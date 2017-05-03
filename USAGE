@@ -1,0 +1,56 @@
+DESCRIPTION:  Converts digital film negatives (TIFF files) to positive images,
+              allowing basic image editing. These utilities are used:
+
+              - GNU Parallel: Use all CPU cores for maximum speed
+              - ImageMagick:  Negative inversion, B/W grayscaling,
+                              contrast enhancements, resizing,
+                              ZIP or JPEG compression
+
+USAGE:        Batch mode: Process all TIFF files in current directory:
+              $ processneg -a [OPTIONS]
+
+              Process one or more TIFF file(s):
+              $ processneg [OPTIONS] FILE [other FILE(s)]
+
+OPTIONS:
+-a            Use batch mode, process any TIFF file in working directory.
+
+-d            Desaturate colors, recommended for B/W neagtives.
+              Bonus: The TIFF will be converted to 16 bit Grayscale,
+              saving up to 60% in file size; The image will have
+              linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
+
+-g value      Gamma correction value to apply.
+              It is highly recommended to use this parameter with -n.
+
+              Values are up to your taste and the negative density!
+              Examples for typical values are:
+
+              1.0 - No Gamma for linear TIFFs.
+                    This is the default value if omitted.
+              1.8 - Moderate darkening, resulting in light images
+              2.2 - Well-known software standard;
+                    This is what common photo software would apply.
+              3.6 - Smooth tones, not too light
+              4.4 - Still mellow, not too contrasty
+
+-j quality    Convert to JPG, using this JPG quality.
+                0: Do not convert. Same as omitting this parameter.
+               92: overall best quality.
+              100: nearly useless best quality.
+
+-n            Normalize: Stretch histogram to reach black and white points.
+              Recommended for most images.
+
+-o path       Output directory. Default is current working dir.
+
+-r pixel      Resize larger side to this pixel length, preserving aspect ratio.
+
+-s value      Sigmoidal contrast value around 50% middle-gray.
+              Increases the contrast without saturating highlights or shadows.
+              Quoted from ImageMagick docs: "3 is typical and 20 is a lot."
+              Disabled if omitted.
+
+-v            Turn on verbous mode.
+
+LICENSE:      CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>
