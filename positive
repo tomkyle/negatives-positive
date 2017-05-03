@@ -50,6 +50,11 @@ require getconf
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPT_NAME=$(basename $0)
 
+# Consistent package location
+HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
+# Hack for development purposes
+# HOMEBREW_OPT_DIR=$SCRIPT_DIR
+
 # Where to look
 SEARCH_DIR="."
 
@@ -87,17 +92,31 @@ C_GREEN='\033[0;32m'
 C_BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
+# Informative files
+LICENSE_FILE="LICENSE"
+USAGE_FILE="USAGE"
+CREDITS_FILE="CREDITS"
 
 # ======================================
 #  Examine parameters
 # ======================================
 
 # Output small doc if no parameter given
-if [[ $# -eq 0 ]]; then
-	cat "${SCRIPT_DIR}/USAGE"
+if [ "$#" -eq 0 ]; then
+	if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
+	   	cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
+	else
+		cat "${SCRIPT_DIR}/${USAGE_FILE}"
+	fi
+
 	echo;
-	cat "${SCRIPT_DIR}/CREDITS"
-	exit 0;
+	if [ -f "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}" ]; then
+	   	cat "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}"
+	else
+		cat "${SCRIPT_DIR}/${CREDITS_FILE}"
+	fi
+	echo;
+	exit;
 fi
 
 
