@@ -116,7 +116,7 @@ if [ "$#" -eq 0 ]; then
 		cat "${SCRIPT_DIR}/${CREDITS_FILE}"
 	fi
 	echo;
-	exit;
+	exit 1;
 fi
 
 
