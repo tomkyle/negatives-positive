@@ -45,6 +45,7 @@ Option | Value | Description
 :------|:------|:------------
 -a     | | All images (batch mode). Process any TIFF file in working directory.
 -d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
+-f     | value | Mirror the image vertically or horizontally. Possible values are `flop` (default) `flip`, or `none`. *flop* is default because negatives should be digitalized on their emulsion side. 
 -g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
 -j     | quality | Save image as JPG with given quality. Example: `-j 90`
 -n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.

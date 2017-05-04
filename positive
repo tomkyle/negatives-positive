@@ -20,7 +20,9 @@
 # Runtime Environment
 # ---------------------------------------------------------
 
+# Exit if any statement returns a non-true return value.
 set -o errexit
+# Exit if trying to use an uninitialised variable
 set -o nounset
 set -o pipefail
 # set -o xtrace
@@ -34,17 +36,33 @@ function require  {
 	command -v $1 >/dev/null 2>&1 || exit_err "Program '${1}' required, but it's not installed";
 }
 
+
+# --------------------------------------
 # Requirements
+# --------------------------------------
+
+# Homebrew dependencies
 require mogrify
 require convert
 require parallel
 require iccprofiles
+
+# System commands
 require getconf
+require brew
+require dirname
+require basename
+require getopts
+require awk
 
 
 # ======================================
 #  Prerequisites
 # ======================================
+
+# --------------------------------------
+# Directories
+# --------------------------------------
 
 # Directory where this script lives in
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -55,12 +73,23 @@ HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 # Hack for development purposes
 # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
-# Where to look
+
+# --------------------------------------
+# Search files
+# --------------------------------------
+
+# Files to work on
+# The regex shown here must be suitable for regex find'ing:
+# -iregex '.*\.(tif|tiff)'
+SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
+
+# Where to search
 SEARCH_DIR="."
 
-# The files to work with
-INPUT_FILES='.*\.(tif|tiff)'
 
+# --------------------------------------
+# The result suffix
+# --------------------------------------
 
 # To be appended to output file names
 RESULT_SUFFIX=""
@@ -71,8 +100,14 @@ RESULT_SUFFIX_DEFAULT="-positive"
 # 0: disabled
 APPEND_RESULT_SUFFIX=1
 
+
+# --------------------------------------
+# Output contrast settings
+# --------------------------------------
+
 # Default Gamma value
 GAMMA_DEFAULT=1
+
 
 # Percentage of histogram edges to be truncated.
 # The default is that 0.1 percent of the histogram entries are ignored.
@@ -80,9 +115,31 @@ GAMMA_DEFAULT=1
 HISTOGRAM_THRESHOLD=0.1
 
 
+# Wether to "flop" or "flip" the image.
+# Possible values:
+#
+# "flip"   mirrors the image will be mirrored upside-down.
+# "flop"   mirrors the image will be mirrored horizontally.
+# "none"   Disable both
+FLIPFLOP_POSITIVE_DEFAULT="flop"
+
+
+# --------------------------------------
 # Pathes to ICC profiles
+# --------------------------------------
+
+# Linear Gamma 1.0 Gray profile
+# Applied when output is converted to Grayscale
 GRAY_ICC_PROFILE_PATH=$(iccprofiles gray-linear )
+
+# ICC's sRGB v4 Appearance profile
+# Applied when output is converted to JPEG
 SRGB_APPEARANCE_ICC_PROFILE_PATH=$(iccprofiles srgb-v4 )
+
+
+# --------------------------------------
+# Internal use
+# --------------------------------------
 
 # Formatting stuff
 DIVIDER_LINE="------------------------------------------"
@@ -92,16 +149,21 @@ C_GREEN='\033[0;32m'
 C_BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
+
 # Informative files
 LICENSE_FILE="LICENSE"
 USAGE_FILE="USAGE"
 CREDITS_FILE="CREDITS"
 
+
 # ======================================
-#  Examine parameters
+#  Script parameter handling
 # ======================================
 
+
+# --------------------------------------
 # Output small doc if no parameter given
+# --------------------------------------
 if [ "$#" -eq 0 ]; then
 	if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
 	   	cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
@@ -120,7 +182,11 @@ if [ "$#" -eq 0 ]; then
 fi
 
 
-# Default values, optionally to be overriden by parameter values
+# --------------------------------------
+# Default parameter values.
+# May be overriden by user.
+# --------------------------------------
+
 BATCH_MODE=0
 NORMALIZE_COLORS=0
 GAMMA="${GAMMA_DEFAULT}"
@@ -130,14 +196,20 @@ VERBOUS_MODE=0
 SIGMOIDAL_CONTRAST=0
 RESIZE_IMAGE=0
 JPEG_QUALITY=0
+FLIPFLOP_POSITIVE="${FLIPFLOP_POSITIVE_DEFAULT}"
 
-while getopts adnj:g:o:c:r:s:v option
+# --------------------------------------
+# Parse parameters
+# --------------------------------------
+
+while getopts adnf:j:g:o:c:r:s:v option
 do
 		case "${option}"
 		in
 			a)	BATCH_MODE=1;;
 			d)	DESATURATE_COLORS=1;;
 			n)	NORMALIZE_COLORS=1;;
+			f)	FLIPFLOP_POSITIVE="${OPTARG}";;
 			j)	JPEG_QUALITY="${OPTARG}";;
 			g)	GAMMA="${OPTARG}";;
 			o)	OUTPUT_DIRECTORY=${OPTARG};;
@@ -155,7 +227,7 @@ shift $(( OPTIND - 1 ));
 
 
 # ======================================
-#  Batch processing
+#  Batch processing: parameter -a
 # ======================================
 if [ $BATCH_MODE -eq  1 ]; then
 
@@ -174,7 +246,7 @@ if [ $BATCH_MODE -eq  1 ]; then
 	# ---------------------------------------
 	# Find Files to process
 	# ---------------------------------------
-	find -E "${SEARCH_DIR}" -maxdepth 1 -type f -iregex "${INPUT_FILES}" > "${TODO_TXT}"
+	find -E "${SEARCH_DIR}" -maxdepth 1 -type f -iregex "${SEARCH_FILES_IREGEX}" > "${TODO_TXT}"
 	NUMOFIMAGES=$(cat "${TODO_TXT}" | wc -l | sed -e 's/^[ \t]*//')
 
 
@@ -193,6 +265,7 @@ if [ $BATCH_MODE -eq  1 ]; then
 	# ---------------------------------------
 	PARAMS=""
 	if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then PARAMS="${PARAMS} -g ${GAMMA}"; fi
+	if [ "${FLIPFLOP_POSITIVE}" != "${FLIPFLOP_POSITIVE_DEFAULT}" ]; then PARAMS="${PARAMS} -f ${FLIPFLOP_POSITIVE}"; fi
 	if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${OUTPUT_DIRECTORY}"; fi
 	if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then PARAMS="${PARAMS} -s ${SIGMOIDAL_CONTRAST}"; fi
 	if [ $NORMALIZE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -n"; fi
@@ -233,7 +306,7 @@ if [ $BATCH_MODE -eq  1 ]; then
 	echo "Elapsed time:     $(($ELAPSED_TIME/60))min $(($ELAPSED_TIME%60))sec"
 	echo "Done:             ${NUMOFIMAGES} images"
 
-	unset require TODO_TXT INPUT_FILES ELAPSED_TIME START_TIME NUMOFIMAGES CPUs RUN_MODE LINES IMAGE RESIZE_IMAGE;
+	unset require TODO_TXT SEARCH_FILES_IREGEX ELAPSED_TIME START_TIME NUMOFIMAGES CPUs RUN_MODE LINES IMAGE RESIZE_IMAGE;
 
 
 
@@ -251,8 +324,15 @@ else
 	#  http://www.graphicsmagick.org/GraphicsMagick.html#details-negate
 	#  http://www.graphicsmagick.org/GraphicsMagick.html#details-flop
 	# ---------------------------------------
-	OPTIONS="-negate -flop"
+	OPTIONS="-negate"
 
+
+	# ---------------------------------------
+	# Flip or flop the image
+	# ---------------------------------------
+	if [ "${FLIPFLOP_POSITIVE}" != "none" ]; then
+		OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
+	fi
 
 
 	# ---------------------------------------
@@ -341,11 +421,15 @@ else
 	# is identical with $PWD
 	# ---------------------------------------
 
+	# Reset if generally disabled
+
 	if [ $APPEND_RESULT_SUFFIX -eq 0 ]; then
 		RESULT_SUFFIX=""
 	fi;
 
+
 	# Avoid duplicate files when target is $PWD
+
 	if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
 		if [ -z "${RESULT_SUFFIX}" ]; then
 			RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
@@ -422,10 +506,11 @@ else
 
 				printf "Result: ${C_GREEN}${OUTPUT_FILE_JPEG}${NC}\n"
 
-			# ---------------------------------------
-			#  No JPEG compression
-			# ---------------------------------------
+
 			else
+				# ---------------------------------------
+				#  No JPEG compression
+				# ---------------------------------------
 
 				if [ -f "${OUTPUT_FILE}" ]; then
 					printf "Result: ${C_GREEN}${OUTPUT_FILE}${NC}\n"
@@ -442,6 +527,7 @@ else
 			printf "${C_RED}${INPUT_FILE} is not a regular file.${NC}\n"
 		fi;
 
+		# screen readability
 		echo;
 	done
 
