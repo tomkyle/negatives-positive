@@ -120,8 +120,7 @@ HISTOGRAM_THRESHOLD=0.1
 #
 # "flip"   mirrors the image will be mirrored upside-down.
 # "flop"   mirrors the image will be mirrored horizontally.
-#
-# ""       Leave blank to disable!
+# "none"   Disable both
 FLIPFLOP_POSITIVE_DEFAULT="flop"
 
 
@@ -331,7 +330,7 @@ else
 	# ---------------------------------------
 	# Flip or flop the image
 	# ---------------------------------------
-	if [ -n "${FLIPFLOP_POSITIVE}" ]; then
+	if [ "${FLIPFLOP_POSITIVE}" != "none" ]; then
 		OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
 	fi
 
