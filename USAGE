@@ -20,6 +20,15 @@ OPTIONS:
               saving up to 60% in file size; The image will have
               linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
 
+-f direction  Mirror the image vertically or horizontally.
+              Possible values are:
+
+              none - Disable
+              flip - mirror upside-down
+              flop - mirror in the horizontal direction (DEFAULT)
+                     This is the way to go when your negatives
+                     have been digitalized on their emulsion (back) side.
+
 -g value      Gamma correction value to apply.
               It is highly recommended to use this parameter with -n.
 
