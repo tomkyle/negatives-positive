@@ -20,7 +20,9 @@
 # Runtime Environment
 # ---------------------------------------------------------
 
+# Exit if any statement returns a non-true return value.
 set -o errexit
+# Exit if trying to use an uninitialised variable
 set -o nounset
 set -o pipefail
 # set -o xtrace
