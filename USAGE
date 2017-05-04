@@ -7,10 +7,10 @@ DESCRIPTION:  Converts digital film negatives (TIFF files) to positive images,
                               ZIP or JPEG compression
 
 USAGE:        Batch mode: Process all TIFF files in current directory:
-              $ processneg -a [OPTIONS]
+              $ positive -a [OPTIONS]
 
               Process one or more TIFF file(s):
-              $ processneg [OPTIONS] FILE [other FILE(s)]
+              $ positive [OPTIONS] FILE [other FILE(s)]
 
 OPTIONS:
 -a            Use batch mode, process any TIFF file in working directory.
