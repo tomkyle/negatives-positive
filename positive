@@ -55,12 +55,11 @@ HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 # Hack for development purposes
 # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
-# Where to look
-SEARCH_DIR="."
-
-# The files to work with
+# Where and what to search.
+# The regex shown here must be suitable for regex find'ing:
+# -iregex '.*\.(tif|tiff)'
 INPUT_FILES='.*\.(tif|tiff)'
-
+SEARCH_DIR="."
 
 # To be appended to output file names
 RESULT_SUFFIX=""
