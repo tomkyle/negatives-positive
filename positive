@@ -46,6 +46,10 @@ require getconf
 #  Prerequisites
 # ======================================
 
+# --------------------------------------
+# Directories
+# --------------------------------------
+
 # Directory where this script lives in
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPT_NAME=$(basename $0)
@@ -55,11 +59,23 @@ HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 # Hack for development purposes
 # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
-# Where and what to search.
+
+# --------------------------------------
+# Search files
+# --------------------------------------
+
+# Files to work on
 # The regex shown here must be suitable for regex find'ing:
 # -iregex '.*\.(tif|tiff)'
 SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
+
+# Where to search
 SEARCH_DIR="."
+
+
+# --------------------------------------
+# The result suffix
+# --------------------------------------
 
 # To be appended to output file names
 RESULT_SUFFIX=""
@@ -70,6 +86,11 @@ RESULT_SUFFIX_DEFAULT="-positive"
 # 0: disabled
 APPEND_RESULT_SUFFIX=1
 
+
+# --------------------------------------
+# Output contrast settings
+# --------------------------------------
+
 # Default Gamma value
 GAMMA_DEFAULT=1
 
@@ -79,9 +100,19 @@ GAMMA_DEFAULT=1
 HISTOGRAM_THRESHOLD=0.1
 
 
+# --------------------------------------
+# ICC profiles
+# --------------------------------------
+
 # Pathes to ICC profiles
 GRAY_ICC_PROFILE_PATH=$(iccprofiles gray-linear )
 SRGB_APPEARANCE_ICC_PROFILE_PATH=$(iccprofiles srgb-v4 )
+
+
+# --------------------------------------
+# Internal use
+# --------------------------------------
+
 
 # Formatting stuff
 DIVIDER_LINE="------------------------------------------"
@@ -95,6 +126,7 @@ NC='\033[0m' # No Color
 LICENSE_FILE="LICENSE"
 USAGE_FILE="USAGE"
 CREDITS_FILE="CREDITS"
+
 
 # ======================================
 #  Examine parameters
