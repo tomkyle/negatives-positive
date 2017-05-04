@@ -49,7 +49,9 @@ require iccprofiles
 require getconf
 require brew
 require dirname
-
+require basename
+require getopts
+require awk
 
 
 # ======================================
