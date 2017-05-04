@@ -101,18 +101,21 @@ HISTOGRAM_THRESHOLD=0.1
 
 
 # --------------------------------------
-# ICC profiles
+# Pathes to ICC profiles
 # --------------------------------------
 
-# Pathes to ICC profiles
+# Linear Gamma 1.0 Gray profile
+# Applied when output is converted to Grayscale
 GRAY_ICC_PROFILE_PATH=$(iccprofiles gray-linear )
+
+# ICC's sRGB v4 Appearance profile
+# Applied when output is converted to JPEG
 SRGB_APPEARANCE_ICC_PROFILE_PATH=$(iccprofiles srgb-v4 )
 
 
 # --------------------------------------
 # Internal use
 # --------------------------------------
-
 
 # Formatting stuff
 DIVIDER_LINE="------------------------------------------"
@@ -121,6 +124,7 @@ C_RED='\033[0;31m'
 C_GREEN='\033[0;32m'
 C_BLUE='\033[1;34m'
 NC='\033[0m' # No Color
+
 
 # Informative files
 LICENSE_FILE="LICENSE"
@@ -132,7 +136,10 @@ CREDITS_FILE="CREDITS"
 #  Examine parameters
 # ======================================
 
+
+# --------------------------------------
 # Output small doc if no parameter given
+# --------------------------------------
 if [ "$#" -eq 0 ]; then
 	if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
 	   	cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
@@ -151,7 +158,11 @@ if [ "$#" -eq 0 ]; then
 fi
 
 
-# Default values, optionally to be overriden by parameter values
+# --------------------------------------
+# Default parameter values.
+# May be overriden by user.
+# --------------------------------------
+
 BATCH_MODE=0
 NORMALIZE_COLORS=0
 GAMMA="${GAMMA_DEFAULT}"
@@ -161,6 +172,11 @@ VERBOUS_MODE=0
 SIGMOIDAL_CONTRAST=0
 RESIZE_IMAGE=0
 JPEG_QUALITY=0
+
+
+# --------------------------------------
+# Parse parameters
+# --------------------------------------
 
 while getopts adnj:g:o:c:r:s:v option
 do
@@ -372,11 +388,15 @@ else
 	# is identical with $PWD
 	# ---------------------------------------
 
+	# Reset if generally disabled
+
 	if [ $APPEND_RESULT_SUFFIX -eq 0 ]; then
 		RESULT_SUFFIX=""
 	fi;
 
+
 	# Avoid duplicate files when target is $PWD
+
 	if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
 		if [ -z "${RESULT_SUFFIX}" ]; then
 			RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
@@ -453,10 +473,11 @@ else
 
 				printf "Result: ${C_GREEN}${OUTPUT_FILE_JPEG}${NC}\n"
 
-			# ---------------------------------------
-			#  No JPEG compression
-			# ---------------------------------------
+
 			else
+				# ---------------------------------------
+				#  No JPEG compression
+				# ---------------------------------------
 
 				if [ -f "${OUTPUT_FILE}" ]; then
 					printf "Result: ${C_GREEN}${OUTPUT_FILE}${NC}\n"
@@ -473,6 +494,7 @@ else
 			printf "${C_RED}${INPUT_FILE} is not a regular file.${NC}\n"
 		fi;
 
+		# screen readability
 		echo;
 	done
 
