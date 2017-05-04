@@ -34,12 +34,22 @@ function require  {
 	command -v $1 >/dev/null 2>&1 || exit_err "Program '${1}' required, but it's not installed";
 }
 
+
+# --------------------------------------
 # Requirements
+# --------------------------------------
+
+# Homebrew dependencies
 require mogrify
 require convert
 require parallel
 require iccprofiles
+
+# System commands
 require getconf
+require brew
+require dirname
+
 
 
 # ======================================
