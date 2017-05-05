@@ -23,9 +23,8 @@ OPTIONS:
 -f direction  Mirror the image vertically or horizontally.
               Possible values are:
 
-              none - Disable
               flip - mirror upside-down
-              flop - mirror in the horizontal direction (DEFAULT)
+              flop - mirror in the horizontal direction
                      This is the way to go when your negatives
                      have been digitalized on their emulsion (back) side.
 
@@ -42,6 +41,7 @@ OPTIONS:
                     This is what common photo software would apply.
               3.6 - Smooth tones, not too light
               4.4 - Still mellow, not too contrasty
+              5.0 - Still usable results with uncropped negatives
 
 -j quality    Convert to JPG, using this JPG quality.
                 0: Do not convert. Same as omitting this parameter.
@@ -51,7 +51,7 @@ OPTIONS:
 -n            Normalize: Stretch histogram to reach black and white points.
               Recommended for most images.
 
--o path       Output directory. Default is current working dir.
+-o path       Output directory; Default is current working dir.
 
 -r pixel      Resize larger side to this pixel length, preserving aspect ratio.
 
