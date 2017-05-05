@@ -118,10 +118,10 @@ HISTOGRAM_THRESHOLD=0.1
 # Wether to "flop" or "flip" the image.
 # Possible values:
 #
+# ""       Disabled
 # "flip"   mirrors the image will be mirrored upside-down.
 # "flop"   mirrors the image will be mirrored horizontally.
-# "none"   Disable both
-FLIPFLOP_POSITIVE_DEFAULT="flop"
+FLIPFLOP_POSITIVE_DEFAULT=""
 
 
 # --------------------------------------
@@ -265,7 +265,7 @@ if [ $BATCH_MODE -eq  1 ]; then
 	# ---------------------------------------
 	PARAMS=""
 	if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then PARAMS="${PARAMS} -g ${GAMMA}"; fi
-	if [ "${FLIPFLOP_POSITIVE}" != "${FLIPFLOP_POSITIVE_DEFAULT}" ]; then PARAMS="${PARAMS} -f ${FLIPFLOP_POSITIVE}"; fi
+	if [ !-z "${FLIPFLOP_POSITIVE}" ]; then PARAMS="${PARAMS} -f ${FLIPFLOP_POSITIVE}"; fi
 	if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${OUTPUT_DIRECTORY}"; fi
 	if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then PARAMS="${PARAMS} -s ${SIGMOIDAL_CONTRAST}"; fi
 	if [ $NORMALIZE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -n"; fi
@@ -328,9 +328,9 @@ else
 
 
 	# ---------------------------------------
-	# Flip or flop the image
+	# Flip or flop the image, if required.
 	# ---------------------------------------
-	if [ "${FLIPFLOP_POSITIVE}" != "none" ]; then
+	if [ !-z "${FLIPFLOP_POSITIVE}" ]; then
 		OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
 	fi
 
@@ -430,9 +430,11 @@ else
 	fi;
 
 
-	# Avoid duplicate files when target is $PWD
-
+	# When target directory is $PWD,
+	# duplicate files must be avoided
 	if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
+
+		# If result suffix is empty, assume default value.
 		if [ -z "${RESULT_SUFFIX}" ]; then
 			RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
 		fi;

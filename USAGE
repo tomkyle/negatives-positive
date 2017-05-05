@@ -23,9 +23,8 @@ OPTIONS:
 -f direction  Mirror the image vertically or horizontally.
               Possible values are:
 
-              none - Disable
               flip - mirror upside-down
-              flop - mirror in the horizontal direction (DEFAULT)
+              flop - mirror in the horizontal direction
                      This is the way to go when your negatives
                      have been digitalized on their emulsion (back) side.
 
