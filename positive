@@ -112,15 +112,6 @@ function main {
   HISTOGRAM_THRESHOLD=0.1
 
 
-  # Wether to "flop" or "flip" the image.
-  # Possible values:
-  #
-  # ""       Disabled
-  # "flip"   mirrors the image will be mirrored upside-down.
-  # "flop"   mirrors the image will be mirrored horizontally.
-  FLIPFLOP_POSITIVE_DEFAULT=""
-
-
   # --------------------------------------
   # Pathes to ICC profiles
   # --------------------------------------
@@ -193,7 +184,7 @@ function main {
   SIGMOIDAL_CONTRAST=0
   RESIZE_IMAGE=0
   JPEG_QUALITY=0
-  FLIPFLOP_POSITIVE="${FLIPFLOP_POSITIVE_DEFAULT}"
+  FLIPFLOP_POSITIVE=""
 
   # --------------------------------------
   # Parse parameters
