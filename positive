@@ -45,7 +45,7 @@ function require  {
 require mogrify
 require convert
 require parallel
-require iccprofiles
+require color-profiles
 
 # System commands
 require getconf
@@ -130,11 +130,11 @@ FLIPFLOP_POSITIVE_DEFAULT="flop"
 
 # Linear Gamma 1.0 Gray profile
 # Applied when output is converted to Grayscale
-GRAY_ICC_PROFILE_PATH=$(iccprofiles gray-linear )
+GRAY_ICC_PROFILE_PATH=$(color-profiles gray-linear )
 
 # ICC's sRGB v4 Appearance profile
 # Applied when output is converted to JPEG
-SRGB_APPEARANCE_ICC_PROFILE_PATH=$(iccprofiles srgb-v4 )
+SRGB_APPEARANCE_ICC_PROFILE_PATH=$(color-profiles srgb-v4 )
 
 
 # --------------------------------------
