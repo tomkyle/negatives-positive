@@ -11,24 +11,30 @@ allowing basic image editing.**
 *These first releases of this package are developed and tested with B/W negatives.*
 
 
-## Requirements
 
-- Install [Homebrew](https://brew.sh/) on your Mac - [Installationsanleitung auf deutsch](https://brew.sh/index_de.html)
+Requirements:
+
+- [Homebrew](https://brew.sh/) Package manager for OS X
+- [tomkyle/homebrew-negatives](https://github.com/tomkyle/homebrew-negatives) Homebrew tap for negatives-related scripts.
+
+## Homebrew Installation (OS X)
 
 
-## Installation with Homebrew
-
-This Homebrew formula is part of the [tomkyle/negatives Homebrew tap](https://github.com/tomkyle/homebrew-negatives). It is recommended to install the tap first. As “tapping” first is not neccessarily needed, you can install the formula directly:
+The *positive* bash script can be installed by a Homebrew formula, which itself is part of the [tomkyle/homebrew-negatives](https://github.com/tomkyle/homebrew-negatives) tap. 
 
 ```bash
+# Install tap, optionally
 $ brew tap tomkyle/negatives
-$ brew install positive
 
-# or directly: 
-$ brew install tomkyle/negatives/positive
+# Install formula
+$ brew install positive
 ```
 
+As “tapping” first is not neccessarily needed, you can install the formula directly:
 
+```bash
+$ brew install tomkyle/negatives/positive
+```
 
 
 # Usage
