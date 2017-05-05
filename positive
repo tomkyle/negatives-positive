@@ -357,6 +357,20 @@ else
 
 
 	# ---------------------------------------
+	#  Apply Sigmoidal Contrast Curve.
+	#  Increases the contrast without saturating highlights or shadows.
+	# ---------------------------------------
+
+	if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then
+		OPTIONS="${OPTIONS} -sigmoidal-contrast ${SIGMOIDAL_CONTRAST},50%";
+
+		# Append to suffix
+		RESULT_SUFFIX="${RESULT_SUFFIX}-s${SIGMOIDAL_CONTRAST}"
+	fi
+
+
+
+	# ---------------------------------------
 	#  Apply Gamma, if required.
 	#  Having colors normalized with -n parameter
 	#  is heavily recommended.
@@ -371,18 +385,6 @@ else
 	fi
 
 
-
-	# ---------------------------------------
-	#  Apply Sigmoidal Contrast Curve.
-	#  Increases the contrast without saturating highlights or shadows.
-	# ---------------------------------------
-
-	if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then
-		OPTIONS="${OPTIONS} -sigmoidal-contrast ${SIGMOIDAL_CONTRAST},50%";
-
-		# Append to suffix
-		RESULT_SUFFIX="${RESULT_SUFFIX}-s${SIGMOIDAL_CONTRAST}"
-	fi
 
 
 
