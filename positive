@@ -5,6 +5,7 @@
 #  positive
 #
 #  Author: Carsten Witt <tomkyle@posteo.de>
+#  Homepage: <https://github.com/tomkyle/negatives-positive>
 #
 #  ImageMagick:
 #  http://www.imagemagick.org/script/mogrify.php
@@ -533,10 +534,8 @@ function main {
 
   fi;
 
-  #exit 0
+  exit 0
 
 }
 
 main "$@"
-
-echo $SCRIPT_DIR
