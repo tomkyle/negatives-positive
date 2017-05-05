@@ -318,7 +318,7 @@ function main {
     # ---------------------------------------
     # Flip or flop the image, if required.
     # ---------------------------------------
-    if [ !-z "${FLIPFLOP_POSITIVE}" ]; then
+    if [ ! -z "${FLIPFLOP_POSITIVE}" ]; then
       OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
     fi
 
