@@ -58,9 +58,13 @@ require getopts
 require awk
 
 
+
+
 # ======================================
-#  Prerequisites
+#  The main program
 # ======================================
+
+function main {
 
 # --------------------------------------
 # Directories
@@ -540,3 +544,7 @@ else
 fi;
 
 exit 0
+
+}
+
+main "$@"
