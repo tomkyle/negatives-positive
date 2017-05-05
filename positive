@@ -24,6 +24,8 @@
 set -o errexit
 # Exit if trying to use an uninitialised variable
 set -o nounset
+# Causes a pipeline (for example, curl ... | grep foo) to produce
+# a failure return code if any command errors.
 set -o pipefail
 # set -o xtrace
 
@@ -166,14 +168,14 @@ CREDITS_FILE="CREDITS"
 # --------------------------------------
 if [ "$#" -eq 0 ]; then
 	if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
-	   	cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
+			cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
 	else
 		cat "${SCRIPT_DIR}/${USAGE_FILE}"
 	fi
 
 	echo;
 	if [ -f "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}" ]; then
-	   	cat "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}"
+			cat "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}"
 	else
 		cat "${SCRIPT_DIR}/${CREDITS_FILE}"
 	fi
@@ -206,19 +208,19 @@ while getopts adnf:j:g:o:c:r:s:v option
 do
 		case "${option}"
 		in
-			a)	BATCH_MODE=1;;
-			d)	DESATURATE_COLORS=1;;
-			n)	NORMALIZE_COLORS=1;;
-			f)	FLIPFLOP_POSITIVE="${OPTARG}";;
-			j)	JPEG_QUALITY="${OPTARG}";;
-			g)	GAMMA="${OPTARG}";;
-			o)	OUTPUT_DIRECTORY=${OPTARG};;
-			r)	RESIZE_IMAGE=${OPTARG};;
-			s)	SIGMOIDAL_CONTRAST=${OPTARG};;
-			v)	VERBOUS_MODE=1;;
-			*)	exit_err "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
-        		;;
-        esac
+			a)  BATCH_MODE=1;;
+			d)  DESATURATE_COLORS=1;;
+			n)  NORMALIZE_COLORS=1;;
+			f)  FLIPFLOP_POSITIVE="${OPTARG}";;
+			j)  JPEG_QUALITY="${OPTARG}";;
+			g)  GAMMA="${OPTARG}";;
+			o)  OUTPUT_DIRECTORY=${OPTARG};;
+			r)  RESIZE_IMAGE=${OPTARG};;
+			s)  SIGMOIDAL_CONTRAST=${OPTARG};;
+			v)  VERBOUS_MODE=1;;
+			*)  exit_err "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
+						;;
+				esac
 done
 
 shift $(( OPTIND - 1 ));
