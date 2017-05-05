@@ -6,58 +6,20 @@
 #
 #  Author: Carsten Witt <tomkyle@posteo.de>
 #
-#  ImageMagick mogrify:
+#  ImageMagick:
 #  http://www.imagemagick.org/script/mogrify.php
+#  http://www.imagemagick.org/script/convert.php
 #
-#  GNU Parallel
+#  GNU Parallel:
 #  https://www.gnu.org/software/parallel/
 #
 # *******************************************************
 
 
-
-# ---------------------------------------------------------
-# Runtime Environment
-# ---------------------------------------------------------
-
-# Exit if any statement returns a non-true return value.
-set -o errexit
-# Exit if trying to use an uninitialised variable
-set -o nounset
-# Causes a pipeline (for example, curl ... | grep foo) to produce
-# a failure return code if any command errors.
-set -o pipefail
+set -o errexit  # Exit if any statement returns a non-true return value.
+set -o nounset  # Exit if trying to use an uninitialised variable
+set -o pipefail # Pipelines produce failure return code if any command errors.
 # set -o xtrace
-
-
-function exit_err {
-  echo >&2 "${@}"; exit 1;
-}
-
-function require  {
-  command -v $1 >/dev/null 2>&1 || exit_err "Program '${1}' required, but it's not installed";
-}
-
-
-# --------------------------------------
-# Requirements
-# --------------------------------------
-
-# Homebrew dependencies
-require mogrify
-require convert
-require parallel
-require color-profiles
-
-# System commands
-require getconf
-require brew
-require dirname
-require basename
-require getopts
-require awk
-
-
 
 
 # ======================================
@@ -66,485 +28,515 @@ require awk
 
 function main {
 
-# --------------------------------------
-# Directories
-# --------------------------------------
+  function exit_err {
+    echo >&2 "${@}"; exit 1;
+  }
 
-# Directory where this script lives in
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SCRIPT_NAME=$(basename $0)
+  function require  {
+    command -v $1 >/dev/null 2>&1 || exit_err "Program '${1}' required, but it's not installed";
+  }
 
-# Consistent package location
-HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
-# Hack for development purposes
-# HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
+  # --------------------------------------
+  # Requirements
+  # --------------------------------------
 
-# --------------------------------------
-# Search files
-# --------------------------------------
+  # Homebrew dependencies
+  require mogrify
+  require convert
+  require parallel
+  require color-profiles
 
-# Files to work on
-# The regex shown here must be suitable for regex find'ing:
-# -iregex '.*\.(tif|tiff)'
-SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
+  # System commands
+  require getconf
+  require brew
+  require dirname
+  require basename
+  require getopts
+  require awk
 
-# Where to search
-SEARCH_DIR="."
 
+  # --------------------------------------
+  # Directories
+  # --------------------------------------
 
-# --------------------------------------
-# The result suffix
-# --------------------------------------
+  # Directory where this script lives in
+  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  SCRIPT_NAME=$(basename $0)
 
-# To be appended to output file names
-RESULT_SUFFIX=""
-RESULT_SUFFIX_DEFAULT="-positive"
+  # Consistent package location
+  HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
+  # Hack for development purposes
+  # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
-# Enable or disable RESULT_SUFFIX.
-# 1: enabled (default)
-# 0: disabled
-APPEND_RESULT_SUFFIX=1
 
+  # --------------------------------------
+  # Search files
+  # --------------------------------------
 
-# --------------------------------------
-# Output contrast settings
-# --------------------------------------
+  # Files to work on
+  # The regex shown here must be suitable for regex find'ing:
+  # -iregex '.*\.(tif|tiff)'
+  SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
 
-# Default Gamma value
-GAMMA_DEFAULT=1
-
-
-# Percentage of histogram edges to be truncated.
-# The default is that 0.1 percent of the histogram entries are ignored.
-# Set to 0 to use the complete histogram.
-HISTOGRAM_THRESHOLD=0.1
-
-
-# Wether to "flop" or "flip" the image.
-# Possible values:
-#
-# ""       Disabled
-# "flip"   mirrors the image will be mirrored upside-down.
-# "flop"   mirrors the image will be mirrored horizontally.
-FLIPFLOP_POSITIVE_DEFAULT=""
-
-
-# --------------------------------------
-# Pathes to ICC profiles
-# --------------------------------------
-
-# Linear Gamma 1.0 Gray profile
-# Applied when output is converted to Grayscale
-GRAY_ICC_PROFILE_PATH=$(color-profiles gray-linear )
-
-# ICC's sRGB v4 Appearance profile
-# Applied when output is converted to JPEG
-SRGB_APPEARANCE_ICC_PROFILE_PATH=$(color-profiles srgb-v4 )
-
-
-# --------------------------------------
-# Internal use
-# --------------------------------------
-
-# Formatting stuff
-DIVIDER_LINE="------------------------------------------"
-C_WHITE='\033[1;37m'
-C_RED='\033[0;31m'
-C_GREEN='\033[0;32m'
-C_BLUE='\033[1;34m'
-NC='\033[0m' # No Color
-
-
-# Informative files
-LICENSE_FILE="LICENSE"
-USAGE_FILE="USAGE"
-CREDITS_FILE="CREDITS"
-
-
-# ======================================
-#  Script parameter handling
-# ======================================
-
+  # Where to search
+  SEARCH_DIR="."
 
-# --------------------------------------
-# Output small doc if no parameter given
-# --------------------------------------
-if [ "$#" -eq 0 ]; then
-  if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
-    cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
-  else
-    cat "${SCRIPT_DIR}/${USAGE_FILE}"
-  fi
-
-  echo;
-  if [ -f "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}" ]; then
-    cat "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}"
-  else
-    cat "${SCRIPT_DIR}/${CREDITS_FILE}"
-  fi
-  echo;
-  exit 1;
-fi
-
-
-# --------------------------------------
-# Default parameter values.
-# May be overriden by user.
-# --------------------------------------
-
-BATCH_MODE=0
-NORMALIZE_COLORS=0
-GAMMA="${GAMMA_DEFAULT}"
-OUTPUT_DIRECTORY="${PWD}"
-DESATURATE_COLORS=0
-VERBOUS_MODE=0
-SIGMOIDAL_CONTRAST=0
-RESIZE_IMAGE=0
-JPEG_QUALITY=0
-FLIPFLOP_POSITIVE="${FLIPFLOP_POSITIVE_DEFAULT}"
-
-# --------------------------------------
-# Parse parameters
-# --------------------------------------
-
-while getopts adnf:j:g:o:c:r:s:v option
-do
-  case "${option}"
-  in
-    a)  BATCH_MODE=1;;
-    d)  DESATURATE_COLORS=1;;
-    n)  NORMALIZE_COLORS=1;;
-    f)  FLIPFLOP_POSITIVE="${OPTARG}";;
-    j)  JPEG_QUALITY="${OPTARG}";;
-    g)  GAMMA="${OPTARG}";;
-    o)  OUTPUT_DIRECTORY=${OPTARG};;
-    r)  RESIZE_IMAGE=${OPTARG};;
-    s)  SIGMOIDAL_CONTRAST=${OPTARG};;
-    v)  VERBOUS_MODE=1;;
-    *)  exit_err "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
-        ;;
-  esac
-done
-
-shift $(( OPTIND - 1 ));
-
-
-
-
-# ======================================
-#  Batch processing: parameter -a
-# ======================================
-if [ $BATCH_MODE -eq  1 ]; then
-
-  echo $DIVIDER_LINE
-
-  # ---------------------------------------
-  # The TODO-File in temp directory
-  # ---------------------------------------
-  WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { exit_err "Failed to create temp directory"; }
-  TODO_TXT="${WORK_TMPDIR}/positive-todo.txt"
-  >"${TODO_TXT}"
-
-  START_TIME=$SECONDS
-
-
-  # ---------------------------------------
-  # Find Files to process
-  # ---------------------------------------
-  find -E "${SEARCH_DIR}" -maxdepth 1 -type f -iregex "${SEARCH_FILES_IREGEX}" > "${TODO_TXT}"
-  NUMOFIMAGES=$(cat "${TODO_TXT}" | wc -l | sed -e 's/^[ \t]*//')
-
-
-  # ---------------------------------------
-  # Print some information
-  # ---------------------------------------
-  if [ $VERBOUS_MODE -eq 1 ]; then
-    printf "${C_BLUE}Files to process:${NC}\n"
-    cat "${TODO_TXT}"
-    echo;
-  fi
-
-
-  # ---------------------------------------
-  # Build param string for recursive calls
-  # ---------------------------------------
-  PARAMS=""
-  if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then PARAMS="${PARAMS} -g ${GAMMA}"; fi
-  if [ !-z "${FLIPFLOP_POSITIVE}" ]; then PARAMS="${PARAMS} -f ${FLIPFLOP_POSITIVE}"; fi
-  if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${OUTPUT_DIRECTORY}"; fi
-  if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then PARAMS="${PARAMS} -s ${SIGMOIDAL_CONTRAST}"; fi
-  if [ $NORMALIZE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -n"; fi
-  if [ $DESATURATE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -d"; fi
-  if [ $JPEG_QUALITY -gt 0 ]; then PARAMS="${PARAMS} -j ${JPEG_QUALITY}"; fi
-  if [ $RESIZE_IMAGE -gt 0 ]; then PARAMS="${PARAMS} -r ${RESIZE_IMAGE}"; fi
-  if [ $VERBOUS_MODE -gt 0 ]; then PARAMS="${PARAMS} -v"; fi
-
-
-  # ---------------------------------------
-  # Start parallel processing
-  # ---------------------------------------
-  printf "${C_BLUE}Process ${NUMOFIMAGES} images, using GNU Parallel:${NC}\n"
-  echo;
-
-  cat "${TODO_TXT}" | parallel "$0" $PARAMS {}
-
-
-  # ---------------------------------------
-  # Some stats
-  # ---------------------------------------
-  CPUs=$(getconf _NPROCESSORS_ONLN)
-  ELAPSED_TIME=$(($SECONDS - $START_TIME))
-
-
-  # ---------------------------------------
-  # Remove crap
-  # ---------------------------------------
-  rm -Rf "${WORK_TMPDIR}"
-
-
-  # ---------------------------------------
-  # Write outro
-  # ---------------------------------------
-  echo $DIVIDER_LINE
-  printf "${C_BLUE}Some stats:${NC}\n"
-  echo "CPUs used:        ${CPUs}"
-  echo "Elapsed time:     $(($ELAPSED_TIME/60))min $(($ELAPSED_TIME%60))sec"
-  echo "Done:             ${NUMOFIMAGES} images"
-
-  unset require TODO_TXT SEARCH_FILES_IREGEX ELAPSED_TIME START_TIME NUMOFIMAGES CPUs RUN_MODE LINES IMAGE RESIZE_IMAGE;
-
-
-
-
-# ======================================
-#  No batch mode: process file(s)
-# ======================================
-else
-
-
-  # ---------------------------------------
-  #  Build mogrify's options string:
-  #  We'll start with color inversion (negate) and horizontal flip (flop).
-  #  See:
-  #  http://www.graphicsmagick.org/GraphicsMagick.html#details-negate
-  #  http://www.graphicsmagick.org/GraphicsMagick.html#details-flop
-  # ---------------------------------------
-  OPTIONS="-negate"
-
-
-  # ---------------------------------------
-  # Flip or flop the image, if required.
-  # ---------------------------------------
-  if [ !-z "${FLIPFLOP_POSITIVE}" ]; then
-    OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
-  fi
-
-
-  # ---------------------------------------
-  # Resize image on its larger side
-  # ---------------------------------------
-  if [ $RESIZE_IMAGE -gt 0 ]; then
-    OPTIONS="${OPTIONS} -resize ${RESIZE_IMAGE}x${RESIZE_IMAGE}>"
-  fi
-
-
-  # ---------------------------------------
-  #  Normalize colors, if required:
-  #  Transform image to span the full range of color values
+
+  # --------------------------------------
+  # The result suffix
+  # --------------------------------------
+
+  # To be appended to output file names
+  RESULT_SUFFIX=""
+  RESULT_SUFFIX_DEFAULT="-positive"
+
+  # Enable or disable RESULT_SUFFIX.
+  # 1: enabled (default)
+  # 0: disabled
+  APPEND_RESULT_SUFFIX=1
+
+
+  # --------------------------------------
+  # Output contrast settings
+  # --------------------------------------
+
+  # Default Gamma value
+  GAMMA_DEFAULT=1
+
+
+  # Percentage of histogram edges to be truncated.
+  # The default is that 0.1 percent of the histogram entries are ignored.
+  # Set to 0 to use the complete histogram.
+  HISTOGRAM_THRESHOLD=0.1
+
+
+  # Wether to "flop" or "flip" the image.
+  # Possible values:
   #
-  #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-normalize
-  # ---------------------------------------
-
-  if [ $NORMALIZE_COLORS -eq 1 ]; then
-    OPTIONS="${OPTIONS} -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize";
-  fi
+  # ""       Disabled
+  # "flip"   mirrors the image will be mirrored upside-down.
+  # "flop"   mirrors the image will be mirrored horizontally.
+  FLIPFLOP_POSITIVE_DEFAULT=""
 
 
+  # --------------------------------------
+  # Pathes to ICC profiles
+  # --------------------------------------
 
-  # ---------------------------------------
-  #  Apply Sigmoidal Contrast Curve.
-  #  Increases the contrast without saturating highlights or shadows.
-  # ---------------------------------------
+  # Linear Gamma 1.0 Gray profile
+  # Applied when output is converted to Grayscale
+  GRAY_ICC_PROFILE_PATH=$(color-profiles gray-linear )
 
-  if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then
-    OPTIONS="${OPTIONS} -sigmoidal-contrast ${SIGMOIDAL_CONTRAST},50%";
-
-    # Append to suffix
-    RESULT_SUFFIX="${RESULT_SUFFIX}-s${SIGMOIDAL_CONTRAST}"
-  fi
-
+  # ICC's sRGB v4 Appearance profile
+  # Applied when output is converted to JPEG
+  SRGB_APPEARANCE_ICC_PROFILE_PATH=$(color-profiles srgb-v4 )
 
 
-  # ---------------------------------------
-  #  Apply Gamma, if required.
-  #  Having colors normalized with -n parameter
-  #  is heavily recommended.
-  # ---------------------------------------
+  # --------------------------------------
+  # Internal use
+  # --------------------------------------
 
-  if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then
-    GAMMA_VALUE=`echo "1 ${GAMMA}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}'`
-    OPTIONS="${OPTIONS} -gamma ${GAMMA_VALUE}";
-
-    # Append to suffix
-    RESULT_SUFFIX="${RESULT_SUFFIX}-g${GAMMA/./}"
-  fi
+  # Formatting stuff
+  DIVIDER_LINE="------------------------------------------"
+  C_WHITE='\033[1;37m'
+  C_RED='\033[0;31m'
+  C_GREEN='\033[0;32m'
+  C_BLUE='\033[1;34m'
+  NC='\033[0m' # No Color
 
 
+  # Informative files
+  LICENSE_FILE="LICENSE"
+  USAGE_FILE="USAGE"
+  CREDITS_FILE="CREDITS"
 
 
-
-  # ---------------------------------------
-  #  Desaturate colors, if required.
-  #  Also convert to Grayscale with ICC profile embedded.
-  #  Equivalent to ImageMagick's "-grayscale rec709luma"
-  #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
-  # ---------------------------------------
-
-  if [ $DESATURATE_COLORS -eq 1 ]; then
-    OPTIONS="${OPTIONS} -modulate 100,0 -colorspace Gray -profile ${GRAY_ICC_PROFILE_PATH}"
-  fi
+  # ======================================
+  #  Script parameter handling
+  # ======================================
 
 
-
-  # ---------------------------------------
-  #  Compress image
-  # ---------------------------------------
-  OPTIONS="${OPTIONS} -compress Zip "
-
-
-
-  # ---------------------------------------
-  # Create output directory if needed.
-  # ---------------------------------------
-  if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then
-    mkdir -p "${OUTPUT_DIRECTORY}";
-  fi;
-
-
-  # ---------------------------------------
-  # Reset result suffix,
-  # if disabled somewhere above.
-  # Set to default value, if target directory
-  # is identical with $PWD
-  # ---------------------------------------
-
-  # Reset if generally disabled
-
-  if [ $APPEND_RESULT_SUFFIX -eq 0 ]; then
-    RESULT_SUFFIX=""
-  fi;
-
-
-  # When target directory is $PWD,
-  # duplicate files must be avoided
-  if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
-
-    # If result suffix is empty, assume default value.
-    if [ -z "${RESULT_SUFFIX}" ]; then
-      RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
-    fi;
-  fi;
-
-
-
-  # =============================================================
-  #  The Loop: Process each file given
-  # =============================================================
-
-  for INPUT_FILE in "$@"
-  do
-
-    # ---------------------------------------
-    #  If $INPUT_FILE is regular file
-    # ---------------------------------------
-
-    if [ -f "${INPUT_FILE}" ]; then
-
-      echo $DIVIDER_LINE
-      printf "${C_WHITE}${INPUT_FILE}${NC}\n"
-
-
-      # ---------------------------------------
-      # Filename magic
-      # ---------------------------------------
-      INPUT_FILE_EXTENSION="${INPUT_FILE##*.}";
-      INPUT_FILE_BASENAME="${INPUT_FILE%.$INPUT_FILE_EXTENSION}"
-      INPUT_FILE_BASENAME="${INPUT_FILE_BASENAME##*/}" # remove trailing slash
-
-      OUTPUT_FILE="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.${INPUT_FILE_EXTENSION}"
-      OUTPUT_FILE_JPEG="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.jpg"
-
-      # Create workfile to work on with mogrify
-      cp "${INPUT_FILE}" "${OUTPUT_FILE}"
-
-
-
-      # ---------------------------------------
-      #  Go!
-      # ---------------------------------------
-      if [ $VERBOUS_MODE -gt 0 ]; then echo; fi
-      printf "Create positive image: "
-
-      if [ $VERBOUS_MODE -eq 1 ]; then
-        printf "\nmogrify ${OPTIONS}\n..."
-      fi
-
-      mogrify ${OPTIONS} "${OUTPUT_FILE}" && echo "Done."
-
-
-
-
-      # ---------------------------------------
-      #  Save as JPEG, if required
-      # ---------------------------------------
-
-      if [ $JPEG_QUALITY -gt 0 ]; then
-        if [ $VERBOUS_MODE -gt 0 ]; then echo; fi
-        printf "Convert to JPG (sRGB; quality ${JPEG_QUALITY}): "
-
-        # JPG quality
-        CONVERT_OPTIONS=" -quality ${JPEG_QUALITY}"
-        # Convert to sRGB
-        CONVERT_OPTIONS="${CONVERT_OPTIONS} -colorspace sRGB -profile ${SRGB_APPEARANCE_ICC_PROFILE_PATH}"
-
-        if [ $VERBOUS_MODE -gt 0 ]; then printf "\nconvert ${CONVERT_OPTIONS}\n..."; fi
-
-        convert "${OUTPUT_FILE}" ${CONVERT_OPTIONS} "${OUTPUT_FILE_JPEG}" \
-        && rm "${OUTPUT_FILE}" \
-        && echo "Done."
-
-        printf "Result: ${C_GREEN}${OUTPUT_FILE_JPEG}${NC}\n"
-
-
-      else
-        # ---------------------------------------
-        #  No JPEG compression
-        # ---------------------------------------
-
-        if [ -f "${OUTPUT_FILE}" ]; then
-          printf "Result: ${C_GREEN}${OUTPUT_FILE}${NC}\n"
-        fi;
-
-      fi
-
-
-
-    # ---------------------------------------
-    #  $INPUT_FILE is NOT a regular file
-    # ---------------------------------------
+  # --------------------------------------
+  # Output small doc if no parameter given
+  # --------------------------------------
+  if [ "$#" -eq 0 ]; then
+    if [ -f "${HOMEBREW_OPT_DIR}/${USAGE_FILE}" ]; then
+      cat "${HOMEBREW_OPT_DIR}/${USAGE_FILE}"
     else
-      printf "${C_RED}${INPUT_FILE} is not a regular file.${NC}\n"
-    fi;
+      cat "${SCRIPT_DIR}/${USAGE_FILE}"
+    fi
 
-    # screen readability
     echo;
+    if [ -f "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}" ]; then
+      cat "${HOMEBREW_OPT_DIR}/${CREDITS_FILE}"
+    else
+      cat "${SCRIPT_DIR}/${CREDITS_FILE}"
+    fi
+    echo;
+    exit 1;
+  fi
+
+
+  # --------------------------------------
+  # Default parameter values.
+  # May be overriden by user.
+  # --------------------------------------
+
+  BATCH_MODE=0
+  NORMALIZE_COLORS=0
+  GAMMA="${GAMMA_DEFAULT}"
+  OUTPUT_DIRECTORY="${PWD}"
+  DESATURATE_COLORS=0
+  VERBOUS_MODE=0
+  SIGMOIDAL_CONTRAST=0
+  RESIZE_IMAGE=0
+  JPEG_QUALITY=0
+  FLIPFLOP_POSITIVE="${FLIPFLOP_POSITIVE_DEFAULT}"
+
+  # --------------------------------------
+  # Parse parameters
+  # --------------------------------------
+
+  while getopts adnf:j:g:o:c:r:s:v option
+  do
+    case "${option}"
+    in
+      a)  BATCH_MODE=1;;
+      d)  DESATURATE_COLORS=1;;
+      n)  NORMALIZE_COLORS=1;;
+      f)  FLIPFLOP_POSITIVE="${OPTARG}";;
+      j)  JPEG_QUALITY="${OPTARG}";;
+      g)  GAMMA="${OPTARG}";;
+      o)  OUTPUT_DIRECTORY=${OPTARG};;
+      r)  RESIZE_IMAGE=${OPTARG};;
+      s)  SIGMOIDAL_CONTRAST=${OPTARG};;
+      v)  VERBOUS_MODE=1;;
+      *)  exit_err "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
+          ;;
+    esac
   done
 
-fi;
+  shift $(( OPTIND - 1 ));
 
-exit 0
+
+
+
+  # ======================================
+  #  Batch processing: parameter -a
+  # ======================================
+  if [ $BATCH_MODE -eq  1 ]; then
+
+    echo $DIVIDER_LINE
+
+    # ---------------------------------------
+    # The TODO-File in temp directory
+    # ---------------------------------------
+    WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { exit_err "Failed to create temp directory"; }
+    TODO_TXT="${WORK_TMPDIR}/positive-todo.txt"
+    >"${TODO_TXT}"
+
+    START_TIME=$SECONDS
+
+
+    # ---------------------------------------
+    # Find Files to process
+    # ---------------------------------------
+    find -E "${SEARCH_DIR}" -maxdepth 1 -type f -iregex "${SEARCH_FILES_IREGEX}" > "${TODO_TXT}"
+    NUMOFIMAGES=$(cat "${TODO_TXT}" | wc -l | sed -e 's/^[ \t]*//')
+
+
+    # ---------------------------------------
+    # Print some information
+    # ---------------------------------------
+    if [ $VERBOUS_MODE -eq 1 ]; then
+      printf "${C_BLUE}Files to process:${NC}\n"
+      cat "${TODO_TXT}"
+      echo;
+    fi
+
+
+    # ---------------------------------------
+    # Build param string for recursive calls
+    # ---------------------------------------
+    PARAMS=""
+    if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then PARAMS="${PARAMS} -g ${GAMMA}"; fi
+    if [ ! -z "${FLIPFLOP_POSITIVE}" ]; then PARAMS="${PARAMS} -f ${FLIPFLOP_POSITIVE}"; fi
+    if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${OUTPUT_DIRECTORY}"; fi
+    if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then PARAMS="${PARAMS} -s ${SIGMOIDAL_CONTRAST}"; fi
+    if [ $NORMALIZE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -n"; fi
+    if [ $DESATURATE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -d"; fi
+    if [ $JPEG_QUALITY -gt 0 ]; then PARAMS="${PARAMS} -j ${JPEG_QUALITY}"; fi
+    if [ $RESIZE_IMAGE -gt 0 ]; then PARAMS="${PARAMS} -r ${RESIZE_IMAGE}"; fi
+    if [ $VERBOUS_MODE -gt 0 ]; then PARAMS="${PARAMS} -v"; fi
+
+
+    # ---------------------------------------
+    # Start parallel processing
+    # ---------------------------------------
+    printf "${C_BLUE}Process ${NUMOFIMAGES} images, using GNU Parallel:${NC}\n"
+    echo;
+
+    cat "${TODO_TXT}" | parallel "$0" $PARAMS {}
+
+
+    # ---------------------------------------
+    # Some stats
+    # ---------------------------------------
+    CPUs=$(getconf _NPROCESSORS_ONLN)
+    ELAPSED_TIME=$(($SECONDS - $START_TIME))
+
+
+    # ---------------------------------------
+    # Remove crap
+    # ---------------------------------------
+    rm -Rf "${WORK_TMPDIR}"
+
+
+    # ---------------------------------------
+    # Write outro
+    # ---------------------------------------
+    echo $DIVIDER_LINE
+    printf "${C_BLUE}Some stats:${NC}\n"
+    echo "CPUs used:        ${CPUs}"
+    echo "Elapsed time:     $(($ELAPSED_TIME/60))min $(($ELAPSED_TIME%60))sec"
+    echo "Done:             ${NUMOFIMAGES} images"
+
+    unset require TODO_TXT SEARCH_FILES_IREGEX ELAPSED_TIME START_TIME NUMOFIMAGES CPUs RUN_MODE LINES IMAGE RESIZE_IMAGE;
+
+
+
+
+  # ======================================
+  #  No batch mode: process file(s)
+  # ======================================
+  else
+
+
+    # ---------------------------------------
+    #  Build mogrify's options string:
+    #  We'll start with color inversion (negate) and horizontal flip (flop).
+    #  See:
+    #  http://www.graphicsmagick.org/GraphicsMagick.html#details-negate
+    #  http://www.graphicsmagick.org/GraphicsMagick.html#details-flop
+    # ---------------------------------------
+    OPTIONS="-negate"
+
+
+    # ---------------------------------------
+    # Flip or flop the image, if required.
+    # ---------------------------------------
+    if [ !-z "${FLIPFLOP_POSITIVE}" ]; then
+      OPTIONS="${OPTIONS} -${FLIPFLOP_POSITIVE}"
+    fi
+
+
+    # ---------------------------------------
+    # Resize image on its larger side
+    # ---------------------------------------
+    if [ $RESIZE_IMAGE -gt 0 ]; then
+      OPTIONS="${OPTIONS} -resize ${RESIZE_IMAGE}x${RESIZE_IMAGE}>"
+    fi
+
+
+    # ---------------------------------------
+    #  Normalize colors, if required:
+    #  Transform image to span the full range of color values
+    #
+    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-normalize
+    # ---------------------------------------
+
+    if [ $NORMALIZE_COLORS -eq 1 ]; then
+      OPTIONS="${OPTIONS} -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize";
+    fi
+
+
+
+    # ---------------------------------------
+    #  Apply Sigmoidal Contrast Curve.
+    #  Increases the contrast without saturating highlights or shadows.
+    # ---------------------------------------
+
+    if [ $SIGMOIDAL_CONTRAST -gt 0 ]; then
+      OPTIONS="${OPTIONS} -sigmoidal-contrast ${SIGMOIDAL_CONTRAST},50%";
+
+      # Append to suffix
+      RESULT_SUFFIX="${RESULT_SUFFIX}-s${SIGMOIDAL_CONTRAST}"
+    fi
+
+
+
+    # ---------------------------------------
+    #  Apply Gamma, if required.
+    #  Having colors normalized with -n parameter
+    #  is heavily recommended.
+    # ---------------------------------------
+
+    if [ "${GAMMA}" != "${GAMMA_DEFAULT}" ]; then
+      GAMMA_VALUE=`echo "1 ${GAMMA}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}'`
+      OPTIONS="${OPTIONS} -gamma ${GAMMA_VALUE}";
+
+      # Append to suffix
+      RESULT_SUFFIX="${RESULT_SUFFIX}-g${GAMMA/./}"
+    fi
+
+
+
+
+
+    # ---------------------------------------
+    #  Desaturate colors, if required.
+    #  Also convert to Grayscale with ICC profile embedded.
+    #  Equivalent to ImageMagick's "-grayscale rec709luma"
+    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
+    # ---------------------------------------
+
+    if [ $DESATURATE_COLORS -eq 1 ]; then
+      OPTIONS="${OPTIONS} -modulate 100,0 -colorspace Gray -profile ${GRAY_ICC_PROFILE_PATH}"
+    fi
+
+
+
+    # ---------------------------------------
+    #  Compress image
+    # ---------------------------------------
+    OPTIONS="${OPTIONS} -compress Zip "
+
+
+
+    # ---------------------------------------
+    # Create output directory if needed.
+    # ---------------------------------------
+    if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then
+      mkdir -p "${OUTPUT_DIRECTORY}";
+    fi;
+
+
+    # ---------------------------------------
+    # Reset result suffix,
+    # if disabled somewhere above.
+    # Set to default value, if target directory
+    # is identical with $PWD
+    # ---------------------------------------
+
+    # Reset if generally disabled
+
+    if [ $APPEND_RESULT_SUFFIX -eq 0 ]; then
+      RESULT_SUFFIX=""
+    fi;
+
+
+    # When target directory is $PWD,
+    # duplicate files must be avoided
+    if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
+
+      # If result suffix is empty, assume default value.
+      if [ -z "${RESULT_SUFFIX}" ]; then
+        RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
+      fi;
+    fi;
+
+
+
+    # =============================================================
+    #  The Loop: Process each file given
+    # =============================================================
+
+    for INPUT_FILE in "$@"
+    do
+
+      # ---------------------------------------
+      #  If $INPUT_FILE is regular file
+      # ---------------------------------------
+
+      if [ -f "${INPUT_FILE}" ]; then
+
+        echo $DIVIDER_LINE
+        printf "${C_WHITE}${INPUT_FILE}${NC}\n"
+
+
+        # ---------------------------------------
+        # Filename magic
+        # ---------------------------------------
+        INPUT_FILE_EXTENSION="${INPUT_FILE##*.}";
+        INPUT_FILE_BASENAME="${INPUT_FILE%.$INPUT_FILE_EXTENSION}"
+        INPUT_FILE_BASENAME="${INPUT_FILE_BASENAME##*/}" # remove trailing slash
+
+        OUTPUT_FILE="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.${INPUT_FILE_EXTENSION}"
+        OUTPUT_FILE_JPEG="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.jpg"
+
+        # Create workfile to work on with mogrify
+        cp "${INPUT_FILE}" "${OUTPUT_FILE}"
+
+
+
+        # ---------------------------------------
+        #  Go!
+        # ---------------------------------------
+        if [ $VERBOUS_MODE -gt 0 ]; then echo; fi
+        printf "Create positive image: "
+
+        if [ $VERBOUS_MODE -eq 1 ]; then
+          printf "\nmogrify ${OPTIONS}\n..."
+        fi
+
+        mogrify ${OPTIONS} "${OUTPUT_FILE}" && echo "Done."
+
+
+
+
+        # ---------------------------------------
+        #  Save as JPEG, if required
+        # ---------------------------------------
+
+        if [ $JPEG_QUALITY -gt 0 ]; then
+          if [ $VERBOUS_MODE -gt 0 ]; then echo; fi
+          printf "Convert to JPG (sRGB; quality ${JPEG_QUALITY}): "
+
+          # JPG quality
+          CONVERT_OPTIONS=" -quality ${JPEG_QUALITY}"
+          # Convert to sRGB
+          CONVERT_OPTIONS="${CONVERT_OPTIONS} -colorspace sRGB -profile ${SRGB_APPEARANCE_ICC_PROFILE_PATH}"
+
+          if [ $VERBOUS_MODE -gt 0 ]; then printf "\nconvert ${CONVERT_OPTIONS}\n..."; fi
+
+          convert "${OUTPUT_FILE}" ${CONVERT_OPTIONS} "${OUTPUT_FILE_JPEG}" \
+          && rm "${OUTPUT_FILE}" \
+          && echo "Done."
+
+          printf "Result: ${C_GREEN}${OUTPUT_FILE_JPEG}${NC}\n"
+
+
+        else
+          # ---------------------------------------
+          #  No JPEG compression
+          # ---------------------------------------
+
+          if [ -f "${OUTPUT_FILE}" ]; then
+            printf "Result: ${C_GREEN}${OUTPUT_FILE}${NC}\n"
+          fi;
+
+        fi
+
+
+
+      # ---------------------------------------
+      #  $INPUT_FILE is NOT a regular file
+      # ---------------------------------------
+      else
+        printf "${C_RED}${INPUT_FILE} is not a regular file.${NC}\n"
+      fi;
+
+      # screen readability
+      echo;
+    done
+
+  fi;
+
+  #exit 0
 
 }
 
 main "$@"
+
+echo $SCRIPT_DIR
