@@ -39,7 +39,7 @@ $ brew install tomkyle/negatives/positive
 
 # Usage
 
-Run *positive* without parameters to get a short help text:
+Open your terminal application and go to your images directory. *positive* will work in the current working directory.
 
 ```bash
 $ positive [options] [-a | file(s)]
@@ -47,18 +47,28 @@ $ positive [options] [-a | file(s)]
 
 ## Options
 
+Run *positive* without parameters to get a short help text.
+
+### Files and output
+
 Option | Value | Description
 :------|:------|:------------
 -a     | | All images (batch mode). Process any TIFF file in working directory.
--d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
--f     | value | Mirror the image vertically or horizontally. Possible values are `flop` or `flip`. Example: `-f flop`
--g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+-f     | value | Mirror the image vertically with `flip`, or horizontally using `flop`. *flop* is useful when you photographed the emulsion side of your negatives. Example: `-f flop`
 -j     | quality | Save image as JPG with given quality. Example: `-j 90`
--n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.
 -o     | path  | Output directory. Default is current working dir. Example: `-o positives`
 -r     | pixel | Resize larger side to this pixel length, preserving aspect ratio. Example: `-r 3000`
--s     | value | Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
 -v     |       | Turn on verbous mode
+
+### Color and Contrast
+
+Option | Value | Description
+:------|:------|:------------
+-d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
+-g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+-n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.
+-s     | value | Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
+
 
 ## Examples
 
@@ -142,13 +152,13 @@ Done:             16 images
 
 
 
-### Tweaking colors
+## Tweaking colors
 
 If you are working on linear TIFFs, e.g. as produced by [Dave Coffin's dcraw](http://cybercom.net/~dcoffin/dcraw/dcraw.1.html) by its `-4` flag, both the negative and the positive will look somehow flat, due to their linearity. The dark negative becomes a very light positive. 
 
 The *positive* utility inverses the negative TIFF to positive, and exactly now we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF. Enter `-g gamma` parameter!
 
-#### Gamma correction
+### Gamma correction
 
 The `-g gamma` parameter carries the Gamma correction value to apply. It is highly recommended to use this parameter with *-n*. 
 
@@ -173,7 +183,7 @@ gamma | description
 
 Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamma_correction) [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#level_gamma)
 
-#### Sigmoidal contrast 
+### Sigmoidal contrast 
 
 While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and lighter shadows, leaving the 50% midtone alone. With the `-s value` parameter you can apply a s-like curve to enhance the contrast.
 
@@ -203,22 +213,22 @@ When photographing your negatives, you'll probably use a negatives (film) holder
 
 The following workflow examples assume your linear TIFFs are framed black and white, having used a negative holder with larger frame window.
 
-### Approach: Crop first
+#### Approach: Crop first
 
 Start cropping your images and save them as TIF. Be sure to preserve the ICC profile!
 
 Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` parameter for normalizing colors, both the black and white points will be determined by *the information in your image.* Consequences are: 
 
 0. The higher gamma value or sigmoidal contrast you use, the earlier deepest shadows and lights will start blocking.
-0. Underexposured or overexposured images are normalized and may loose their generic look. Underexposed images may show more film grain.
+0. Underexposured or overexposured images are normalized and may loose their “natural” look. Flat images may show more film grain.
 
 
-### Approach: Do not crop
+#### Approach: Do not crop
 
 Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` parameter for normalizing colors, both the black and white points will be determined by *the darkest grays of the negative holder edges and the lightest parts in the unlit negativ areas.* Deepest shadows and lights are now in the (surfluous) frames. Consequences are: 
 
-0. You may choose higher gamma and sigmoidal contrast values.
-0. The look of underexposured or overexposured images will overall stay the same.
+0. You may choose way higher gamma and sigmoidal contrast values.
+0. The look of underexposured or overexposured images will overall stay natural.
 
 
 
