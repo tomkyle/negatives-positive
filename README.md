@@ -47,18 +47,26 @@ $ positive [options] [-a | file(s)]
 
 ## Options
 
+### Files and output
+
 Option | Value | Description
 :------|:------|:------------
 -a     | | All images (batch mode). Process any TIFF file in working directory.
--d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
--f     | value | Mirror the image vertically or horizontally. Possible values are `flop` or `flip`. Example: `-f flop`
--g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+-f     | value | Mirror the image vertically with `flip`, or horizontally using `flop`. *flop* is useful when you photographed the emulsion side of your negatives. Example: `-f flop`
 -j     | quality | Save image as JPG with given quality. Example: `-j 90`
--n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.
 -o     | path  | Output directory. Default is current working dir. Example: `-o positives`
 -r     | pixel | Resize larger side to this pixel length, preserving aspect ratio. Example: `-r 3000`
--s     | value | Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
 -v     |       | Turn on verbous mode
+
+### Color and Contrast
+
+Option | Value | Description
+:------|:------|:------------
+-d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
+-g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+-n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.
+-s     | value | Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
+
 
 ## Examples
 
