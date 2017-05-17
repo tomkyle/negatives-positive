@@ -35,8 +35,8 @@ set -o pipefail # Pipelines produce failure return code if any command errors.
 declare -i BATCH_MODE=0
 declare -i normalize_colors=0
 declare gamma="${GAMMA_DEFAULT}"
-declare OUTPUT_DIRECTORY="${PWD}"
-declare -i DESATURATE_COLORS=0
+declare output_directory="${PWD}"
+declare -i desaturate_colors=0
 declare -i verbous_mode=0
 declare -i sigmoidal_contrast=0
 declare -i resize_image=0
@@ -213,12 +213,12 @@ function main {
     case "${option}"
     in
       a)  BATCH_MODE=1;;
-      d)  DESATURATE_COLORS=1;;
+      d)  desaturate_colors=1;;
       n)  normalize_colors=1;;
       f)  flipflop_positive="${OPTARG}";;
       j)  jpeg_quality="${OPTARG}";;
       g)  gamma="${OPTARG}";;
-      o)  OUTPUT_DIRECTORY=${OPTARG};;
+      o)  output_directory=${OPTARG};;
       r)  resize_image=${OPTARG};;
       s)  sigmoidal_contrast=${OPTARG};;
       v)  verbous_mode=1;;
@@ -272,10 +272,10 @@ function main {
     PARAMS=""
     if [ "${gamma}" != "${GAMMA_DEFAULT}" ]; then PARAMS="${PARAMS} -g ${gamma}"; fi
     if [ ! -z "${flipflop_positive}" ]; then PARAMS="${PARAMS} -f ${flipflop_positive}"; fi
-    if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${OUTPUT_DIRECTORY}"; fi
+    if [ "${output_directory}" != "${PWD}" ]; then PARAMS="${PARAMS} -o ${output_directory}"; fi
     if [ $sigmoidal_contrast -gt 0 ]; then PARAMS="${PARAMS} -s ${sigmoidal_contrast}"; fi
     if [ $normalize_colors -eq 1 ]; then PARAMS="${PARAMS} -n"; fi
-    if [ $DESATURATE_COLORS -eq 1 ]; then PARAMS="${PARAMS} -d"; fi
+    if [ $desaturate_colors -eq 1 ]; then PARAMS="${PARAMS} -d"; fi
     if [ $jpeg_quality -gt 0 ]; then PARAMS="${PARAMS} -j ${jpeg_quality}"; fi
     if [ $resize_image -gt 0 ]; then PARAMS="${PARAMS} -r ${resize_image}"; fi
     if [ $verbous_mode -gt 0 ]; then PARAMS="${PARAMS} -v"; fi
@@ -401,7 +401,7 @@ function main {
     #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
     # ---------------------------------------
 
-    if [ $DESATURATE_COLORS -eq 1 ]; then
+    if [ $desaturate_colors -eq 1 ]; then
       OPTIONS="${OPTIONS} -modulate 100,0 -colorspace Gray -profile ${GRAY_ICC_PROFILE_PATH}"
     fi
 
@@ -417,8 +417,8 @@ function main {
     # ---------------------------------------
     # Create output directory if needed.
     # ---------------------------------------
-    if [ "${OUTPUT_DIRECTORY}" != "${PWD}" ]; then
-      mkdir -p "${OUTPUT_DIRECTORY}";
+    if [ "${output_directory}" != "${PWD}" ]; then
+      mkdir -p "${output_directory}";
     fi;
 
 
@@ -438,7 +438,7 @@ function main {
 
     # When target directory is $PWD,
     # duplicate files must be avoided
-    if [ "${OUTPUT_DIRECTORY}" = "${PWD}" ]; then
+    if [ "${output_directory}" = "${PWD}" ]; then
 
       # If result suffix is empty, assume default value.
       if [ -z "${RESULT_SUFFIX}" ]; then
@@ -472,8 +472,8 @@ function main {
         INPUT_FILE_BASENAME="${INPUT_FILE%.$INPUT_FILE_EXTENSION}"
         INPUT_FILE_BASENAME="${INPUT_FILE_BASENAME##*/}" # remove trailing slash
 
-        OUTPUT_FILE="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.${INPUT_FILE_EXTENSION}"
-        OUTPUT_FILE_JPEG="${OUTPUT_DIRECTORY}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.jpg"
+        OUTPUT_FILE="${output_directory}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.${INPUT_FILE_EXTENSION}"
+        OUTPUT_FILE_JPEG="${output_directory}/${INPUT_FILE_BASENAME}${RESULT_SUFFIX}.jpg"
 
         # Create workfile to work on with mogrify
         cp "${INPUT_FILE}" "${OUTPUT_FILE}"
