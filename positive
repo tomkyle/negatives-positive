@@ -84,6 +84,11 @@ HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
 
+# Prepare (but not create) a new temp directory
+readonly WORK_TMPDIR=$(mktemp -du "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { e_error "Failed to create temp directory name."; }
+
+
+
 # --------------------------------------
 # Output and formatting functions
 # --------------------------------------
@@ -255,7 +260,7 @@ function main {
     # ---------------------------------------
     # The TODO-File in temp directory
     # ---------------------------------------
-    WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { exit_err "Failed to create temp directory"; }
+    #WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { exit_err "Failed to create temp directory"; }
     TODO_TXT="${WORK_TMPDIR}/positive-todo.txt"
     >"${TODO_TXT}"
 
