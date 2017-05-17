@@ -32,6 +32,17 @@ set -o pipefail # Pipelines produce failure return code if any command errors.
 # These settings can be set with command line arguments.
 # --------------------------------------
 
+BATCH_MODE=0
+normalize_colors=0
+gamma="${GAMMA_DEFAULT}"
+OUTPUT_DIRECTORY="${PWD}"
+DESATURATE_COLORS=0
+verbous_mode=0
+sigmoidal_contrast=0
+resize_image=0
+jpeg_quality=0
+flipflop_positive=""
+
 # --------------------------------------
 # Global settings
 # --------------------------------------
@@ -192,22 +203,6 @@ function main {
     exit 1;
   fi
 
-
-  # --------------------------------------
-  # Default parameter values.
-  # May be overriden by user.
-  # --------------------------------------
-
-  BATCH_MODE=0
-  normalize_colors=0
-  gamma="${GAMMA_DEFAULT}"
-  OUTPUT_DIRECTORY="${PWD}"
-  DESATURATE_COLORS=0
-  verbous_mode=0
-  sigmoidal_contrast=0
-  resize_image=0
-  jpeg_quality=0
-  flipflop_positive=""
 
   # --------------------------------------
   # Parse parameters
