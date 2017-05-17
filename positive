@@ -47,6 +47,13 @@ declare flipflop_positive=""
 # Global settings
 # --------------------------------------
 
+# Files to work on
+# The regex shown here must be suitable for regex find'ing:
+# -iregex '.*\.(tif|tiff)'
+SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
+
+# Where to search
+SEARCH_DIRECTORY="."
 
 # --------------------------------------
 # Immutables
@@ -104,18 +111,6 @@ function main {
   # Hack for development purposes
   # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
-
-  # --------------------------------------
-  # Search files
-  # --------------------------------------
-
-  # Files to work on
-  # The regex shown here must be suitable for regex find'ing:
-  # -iregex '.*\.(tif|tiff)'
-  SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
-
-  # Where to search
-  SEARCH_DIR="."
 
 
   # --------------------------------------
@@ -252,7 +247,7 @@ function main {
     # ---------------------------------------
     # Find Files to process
     # ---------------------------------------
-    find -E "${SEARCH_DIR}" -maxdepth 1 -type f -iregex "${SEARCH_FILES_IREGEX}" > "${TODO_TXT}"
+    find -E "${SEARCH_DIRECTORY}" -maxdepth 1 -type f -iregex "${SEARCH_FILES_IREGEX}" > "${TODO_TXT}"
     NUMOFIMAGES=$(cat "${TODO_TXT}" | wc -l | sed -e 's/^[ \t]*//')
 
 
