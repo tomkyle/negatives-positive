@@ -59,6 +59,19 @@ SEARCH_DIRECTORY="."
 # Immutables
 # --------------------------------------
 
+# List of possible script arguments (getopts)
+# Very much like getopts, expected short options should be appended to the
+# string here. Any option followed by a ':' takes a required argument.
+readonly OPTIONS_LIST=""
+
+
+# Internal Field Separator
+### While this is recommended in "best-practice tutorials",
+### this breaks calling dcraw and mogrify. Better let this commented-out.
+readonly DEFAULT_IFS="${IFS}"
+readonly SAFER_IFS=$'\n\t'
+#IFS="${SAFER_IFS}"
+
 
 # --------------------------------------
 # Output and formatting functions
