@@ -480,34 +480,34 @@ function processNegatives {
     #  The Loop: Process each file given
     # =============================================================
 
-    for INPUT_ITFF in "${INPUT_FILES[@]}"
+    for INPUT_TIFF in "${INPUT_FILES[@]}"
     do
         echo $DIVIDER_LINE
 
         # ---------------------------------------
         # Just in case $RAW_PHOTO is NOT a regular file
         # ---------------------------------------
-        if [ ! -f "${INPUT_ITFF}" ]; then
-            e_warning "$(printf '%s is not a regular file.' "${INPUT_ITFF}")"
+        if [ ! -f "${INPUT_TIFF}" ]; then
+            e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
             continue;
         fi
 
 
-        e_info "$(printf "%s\n" "${INPUT_ITFF}")"
+        e_info "$(printf "%s\n" "${INPUT_TIFF}")"
 
 
         # ---------------------------------------
         # Filename magic
         # ---------------------------------------
-        local input_file_extension="${INPUT_ITFF##*.}";
-        local input_file_basename="${INPUT_ITFF%.$input_file_extension}"
+        local input_file_extension="${INPUT_TIFF##*.}";
+        local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
         input_file_basename="${input_file_basename##*/}" # remove trailing slash
 
         local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
         output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
 
         # Create workfile to work on with mogrify
-        cp "${INPUT_ITFF}" "${output_tiff}"
+        cp "${INPUT_TIFF}" "${output_tiff}"
 
 
 
