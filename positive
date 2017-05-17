@@ -94,6 +94,8 @@ readonly C_WHITE='\033[1;37m'
 readonly C_RED='\033[0;31m'
 readonly C_GREEN='\033[0;32m'
 readonly C_BLUE='\033[1;34m'
+readonly C_GRAY='\033[1;30m'
+readonly C_ORANGE=$(tput setaf 3)
 readonly NC='\033[0m' # No Color
 
 
@@ -106,18 +108,43 @@ readonly CREDITS_FILE="CREDITS"
 # Output and formatting functions
 # --------------------------------------
 
+# Error message and error exit, redirecting stdout to stderr
+function e_error {
+    echo -e >&2 "${C_RED}✖ ${*}${NC}";
+    exit 1;
+}
+
+function e_info {
+  echo -e "${C_BLUE}${*}${NC}"
+}
+
+function e_warning {
+  echo -e "${C_ORANGE}➜ ${*}${NC}"
+}
+
+function e_success () {
+  echo -e "${C_GREEN}✔ ${*}${NC}"
+}
+
+function e_result () {
+  echo -e "${C_GREEN}${*}${NC}"
+}
+
+function e_verbous () {
+  if [ $verbous_mode -gt 0 ]; then
+    echo -e "${C_GRAY}${*}${NC}"
+  fi
+}
+
 # ======================================
 #  The main program
 # ======================================
 
 function main {
 
-  function exit_err {
-    echo >&2 "${@}"; exit 1;
-  }
 
   function require  {
-    command -v $1 >/dev/null 2>&1 || exit_err "Program '${1}' required, but it's not installed";
+    command -v $1 >/dev/null 2>&1 || e_error "Program '${1}' required, but it's not installed";
   }
 
 
@@ -228,7 +255,7 @@ function main {
       r)  resize_image=${OPTARG};;
       s)  sigmoidal_contrast=${OPTARG};;
       v)  verbous_mode=1;;
-      *)  exit_err "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
+      *)  e_error "Unknown option used. Run ${SCRIPT_NAME} without parameters to get a list of all options."
           ;;
     esac
   done
@@ -248,7 +275,7 @@ function main {
     # ---------------------------------------
     # The TODO-File in temp directory
     # ---------------------------------------
-    #WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { exit_err "Failed to create temp directory"; }
+    #WORK_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { e_error "Failed to create temp directory"; }
     TODO_TXT="${WORK_TMPDIR}/positive-todo.txt"
     >"${TODO_TXT}"
 
