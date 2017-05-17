@@ -140,13 +140,6 @@ function main {
   require awk
 
 
-  # --------------------------------------
-  # Directories
-  # --------------------------------------
-
-
-
-
 
 
   # --------------------------------------
@@ -188,11 +181,6 @@ function main {
   # ICC's sRGB v4 Appearance profile
   # Applied when output is converted to JPEG
   SRGB_APPEARANCE_ICC_PROFILE_PATH=$(color-profiles srgb-v4 )
-
-
-  # --------------------------------------
-  # Internal use
-  # --------------------------------------
 
 
 
