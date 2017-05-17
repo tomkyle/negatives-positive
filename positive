@@ -88,6 +88,19 @@ HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 readonly WORK_TMPDIR=$(mktemp -du "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { e_error "Failed to create temp directory name."; }
 
 
+# Formatting stuff
+DIVIDER_LINE="------------------------------------------"
+C_WHITE='\033[1;37m'
+C_RED='\033[0;31m'
+C_GREEN='\033[0;32m'
+C_BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+
+
+# Informative files
+LICENSE_FILE="LICENSE"
+USAGE_FILE="USAGE"
+CREDITS_FILE="CREDITS"
 
 # --------------------------------------
 # Output and formatting functions
@@ -181,19 +194,6 @@ function main {
   # Internal use
   # --------------------------------------
 
-  # Formatting stuff
-  DIVIDER_LINE="------------------------------------------"
-  C_WHITE='\033[1;37m'
-  C_RED='\033[0;31m'
-  C_GREEN='\033[0;32m'
-  C_BLUE='\033[1;34m'
-  NC='\033[0m' # No Color
-
-
-  # Informative files
-  LICENSE_FILE="LICENSE"
-  USAGE_FILE="USAGE"
-  CREDITS_FILE="CREDITS"
 
 
   # ======================================
