@@ -141,7 +141,7 @@ readonly CREDITS_FILE="CREDITS"
 
 # Error message and error exit, redirecting stdout to stderr
 function e_error {
-    echo -e >&2 "${C_RED}✖ ${*}${NC}";
+    echo -e >&2 "${C_RED}Error: ${*}${NC}";
     exit 1;
 }
 
@@ -150,7 +150,7 @@ function e_info {
 }
 
 function e_warning {
-  echo -e "${C_ORANGE}➜ ${*}${NC}"
+  echo -e "${C_ORANGE}Warning: ${*}${NC}"
 }
 
 function e_success () {
@@ -548,7 +548,7 @@ function processNegatives {
           convert "${output_tiff}" ${convert_options} "${output_jpeg}" \
           && e_success
 
-          rm "${output_tiff}"
+          rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
 
           e_result "$(printf "Result: %s" "${output_jpeg}")"
 
@@ -745,7 +745,7 @@ function main {
                 ;;
             -*)
                 # Assume option because of leading "-"
-                e_error "$(printf "Unexpected option: %s\n" "${__option}")"
+                e_error "$(printf "Unexpected option '%s'\n" "${__option}")"
                 ;;
             *)
                 # "Anything else must be an image parameter"
