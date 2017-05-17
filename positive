@@ -50,10 +50,10 @@ declare flipflop_positive=""
 # Files to work on
 # The regex shown here must be suitable for regex find'ing:
 # -iregex '.*\.(tif|tiff)'
-SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
+declare SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
 
 # Where to search
-SEARCH_DIRECTORY="."
+declare SEARCH_DIRECTORY="."
 
 # --------------------------------------
 # Immutables
@@ -74,12 +74,12 @@ readonly SAFER_IFS=$'\n\t'
 
 
 # Filesystem basics
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SCRIPT_NAME=$(basename $0)
+readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly SCRIPT_NAME=$(basename $0)
 
 
 # Consistent package location
-HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
+readonly HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
 # Hack for development purposes
 # HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
@@ -89,18 +89,18 @@ readonly WORK_TMPDIR=$(mktemp -du "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX") 
 
 
 # Formatting stuff
-DIVIDER_LINE="------------------------------------------"
-C_WHITE='\033[1;37m'
-C_RED='\033[0;31m'
-C_GREEN='\033[0;32m'
-C_BLUE='\033[1;34m'
-NC='\033[0m' # No Color
+readonly DIVIDER_LINE="------------------------------------------"
+readonly C_WHITE='\033[1;37m'
+readonly C_RED='\033[0;31m'
+readonly C_GREEN='\033[0;32m'
+readonly C_BLUE='\033[1;34m'
+readonly NC='\033[0m' # No Color
 
 
 # Informative files
-LICENSE_FILE="LICENSE"
-USAGE_FILE="USAGE"
-CREDITS_FILE="CREDITS"
+readonly LICENSE_FILE="LICENSE"
+readonly USAGE_FILE="USAGE"
+readonly CREDITS_FILE="CREDITS"
 
 # --------------------------------------
 # Output and formatting functions
