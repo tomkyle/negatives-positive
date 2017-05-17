@@ -269,15 +269,6 @@ function runBatchMode {
 
 function processNegatives {
 
-}
-
-
-# ======================================
-#  The main program
-# ======================================
-
-function main {
-
   # --------------------------------------
   # Requirements
   # --------------------------------------
@@ -295,6 +286,16 @@ function main {
   require basename
   require getopts
   require awk
+
+}
+
+
+# ======================================
+#  The main program
+# ======================================
+
+function main {
+
 
 
 
