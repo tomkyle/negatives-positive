@@ -136,17 +136,25 @@ function e_verbous () {
   fi
 }
 
+
+
+# --------------------------------------
+# Check if given command is installed, exit otherwise
+#
+# Usage:
+#   require <command>
+# --------------------------------------
+function require  {
+    command -v "${1}" >/dev/null 2>&1 || e_error "$(printf "Program '%s' required, but it's not installed" "${1}")"
+}
+
+
+
 # ======================================
 #  The main program
 # ======================================
 
 function main {
-
-
-  function require  {
-    command -v $1 >/dev/null 2>&1 || e_error "Program '${1}' required, but it's not installed";
-  }
-
 
   # --------------------------------------
   # Requirements
