@@ -137,6 +137,16 @@ function e_verbous () {
 }
 
 
+# --------------------------------------
+# Create Todo file
+# --------------------------------------
+function createTodoFile {
+  mkdir -p "${WORK_TMPDIR}"
+  TODO_TXT="${WORK_TMPDIR}/rawfiles-todo.txt"
+  touch "${TODO_TXT}"
+  echo "${TODO_TXT}"
+}
+
 
 # --------------------------------------
 # Check if given command is installed, exit otherwise
