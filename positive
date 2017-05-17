@@ -73,6 +73,17 @@ readonly SAFER_IFS=$'\n\t'
 #IFS="${SAFER_IFS}"
 
 
+# Filesystem basics
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_NAME=$(basename $0)
+
+
+# Consistent package location
+HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
+# Hack for development purposes
+# HOMEBREW_OPT_DIR=$SCRIPT_DIR
+
+
 # --------------------------------------
 # Output and formatting functions
 # --------------------------------------
@@ -115,14 +126,8 @@ function main {
   # Directories
   # --------------------------------------
 
-  # Directory where this script lives in
-  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  SCRIPT_NAME=$(basename $0)
 
-  # Consistent package location
-  HOMEBREW_OPT_DIR=$(brew --prefix $(basename $0))
-  # Hack for development purposes
-  # HOMEBREW_OPT_DIR=$SCRIPT_DIR
+
 
 
 
