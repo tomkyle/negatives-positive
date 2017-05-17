@@ -142,7 +142,7 @@ function e_verbous () {
 # --------------------------------------
 function createTodoFile {
   mkdir -p "${WORK_TMPDIR}"
-  TODO_TXT="${WORK_TMPDIR}/rawfiles-todo.txt"
+  TODO_TXT="${WORK_TMPDIR}/positive-todo.txt"
   touch "${TODO_TXT}"
   echo "${TODO_TXT}"
 }
