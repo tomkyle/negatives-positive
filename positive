@@ -160,6 +160,88 @@ function require  {
 
 
 
+# --------------------------------------
+# Count lines in file
+#
+# Usage:
+#   countLinesInFile <file>
+# --------------------------------------
+function countLinesInFile {
+    wc -l < "${1}" | sed -e 's/^[ \t]*//'
+}
+
+
+# --------------------------------------
+# catFirstFound
+#
+# Outputs given file in first matching location.
+#
+# Usage:
+#   catFirstFound <file>
+#
+# --------------------------------------
+function catFirstFound {
+    local file_to_cat="${1}"
+    if [ -f "${HOMEBREW_OPT_DIR}/${file_to_cat}" ]; then
+        cat "${HOMEBREW_OPT_DIR}/${file_to_cat}"
+    else
+        cat "${SCRIPT_DIR}/${file_to_cat}"
+    fi
+    echo;
+}
+
+
+# --------------------------------------
+# findFiles
+#
+# Usage:
+#   findFiles iregex dir
+# --------------------------------------
+function findFiles {
+    local regex=${1}
+    local directory=${2}
+    find -E "${directory}" -maxdepth 1 -type f -iregex "${regex}"
+}
+
+
+# --------------------------------------
+# displayHelp
+# --------------------------------------
+function displayHelp {
+    catFirstFound "${USAGE_FILE}"
+    catFirstFound "${CREDITS_FILE}"
+    exit 1;
+}
+
+
+# --------------------------------------
+# _require_argument()
+#
+# Usage:
+#   _require_argument <option> <argument>
+#
+# If <argument> is blank or another option, print an error message
+#
+# This function is stolen from William Melody's bash-boilerplate
+# <https://github.com/alphabetum/bash-boilerplate>
+# --------------------------------------
+
+_require_argument() {
+    # Set local variables from arguments.
+    #
+    # NOTE: 'local' is a non-POSIX bash feature and keeps the variable local to
+    # the block of code, as defined by curly braces. It's easiest to just think
+    # of them as local to a function.
+    local _option="${1:-}"
+    local _argument="${2:-}"
+
+    if [[ -z "${_argument}" ]] || [[ "${_argument}" =~ ^- ]]
+    then
+        e_error "$(printf "Option requires a argument: %s\n" "${_option}")"
+    fi
+}
+
+
 # ======================================
 #  The main program
 # ======================================
