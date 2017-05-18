@@ -1,26 +1,23 @@
 # negatives/positive
 
-**Convert your digital film negatives (linear TIFF files) to positive images,
-allowing basic image editing.**
+**Convert your digital film negatives (linear TIFF files) to positive images.** Other features:
 
- These utilities are used:
+- **Gamma correction** for adjusting midtones
+- **Sigmoidal contrast** for highlights and shadows adjustment
+- **Grayscaling:** B/W lovers save up to 60% disk space. 
+- **Resizing**  when megapixels are not everything
+- **Zipped TIFF or JPEG conversion** 
 
-- [GNU Parallel:](https://www.gnu.org/software/parallel/) Use all CPU cores for maximum speed
-- [ImageMagick:](https://www.imagemagick.org/script/index.php)  Negative inversion, B/W grayscaling, contrast enhancements, resizing, ZIP or JPEG compression
+**What happens inside?** [ImageMagick](https://www.imagemagick.org/script/index.php)  does the image editing. [GNU Parallel](https://www.gnu.org/software/parallel/) mangles multiple images in parallel, depending on your CPU cores.
 
 *These first releases of this package are developed and tested with B/W negatives.*
 
 
 
-Requirements:
-
-- [Homebrew](https://brew.sh/) Package manager for OS X
-- [tomkyle/homebrew-negatives](https://github.com/tomkyle/homebrew-negatives) Homebrew tap for negatives-related scripts.
-
-## Homebrew Installation (OS X)
+## Homebrew Installation (MacOS)
 
 
-The *positive* bash script can be installed by a Homebrew formula, which itself is part of the [tomkyle/homebrew-negatives](https://github.com/tomkyle/homebrew-negatives) tap. 
+The *positive* bash script can be installed by a [Homebrew](https://brew.sh/) formula, which itself is part of the [tomkyle/homebrew-negatives](https://github.com/tomkyle/homebrew-negatives) tap. 
 
 ```bash
 # Install tap, optionally
@@ -39,11 +36,14 @@ $ brew install tomkyle/negatives/positive
 
 # Usage
 
-Open your terminal application and go to your images directory. *positive* will work in the current working directory.
+Open your terminal application and go to your images directory. *positive* will work in the current working directory. Run `positive --help` or `-h` to display help text. 
+
 
 ```bash
 $ positive [options] [-a | file(s)]
 ```
+
+See [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [Workflow Recommendations](#workflow-recommendations)
 
 ## Options
 
@@ -51,24 +51,46 @@ Run *positive* without parameters to get a short help text.
 
 ### Files and output
 
-Option | Value | Description
-:------|:------|:------------
--a     | | All images (batch mode). Process any TIFF file in working directory.
--f     | value | Mirror the image vertically with `flip`, or horizontally using `flop`. *flop* is useful when you photographed the emulsion side of your negatives. Example: `-f flop`
--j     | quality | Save image as JPG with given quality. Example: `-j 90`
--o     | path  | Output directory. Default is current working dir. Example: `-o positives`
--r     | pixel | Resize larger side to this pixel length, preserving aspect ratio. Example: `-r 3000`
--v     |       | Turn on verbous mode
+
+#### -a, --all
+All images (batch mode). Process any TIFF file in working directory.
+
+#### -f, --flipflop *direction*  
+Mirror the image vertically and/or horizontally. Possible values are `flop` horizontal, `flip` vertical or even `flipflop` (guess what). Example: `-f flop`
+
+
+#### -j, --jpeg *quality*
+Save image as JPG with given quality. Example: `-j 90`
+
+
+#### -o, --output *path*  
+Output directory — default is current working directory. Example: `-o results`
+
+
+#### -r, --resize *pixel*
+Resize  image — pixel width for larger side, preserving aspect ratio. Example: `-r 3000`
+
+#### -v, --verbous
+Verbous mode — show some more information under way.
+
+
 
 ### Color and Contrast
 
-Option | Value | Description
-:------|:------|:------------
--d     | | Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
--g     | gamma | Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
--n     |       | Normalize: Stretch histogram to reach black and white points. Recommended for most images.
--s     | value | Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
 
+#### -d, --desaturate
+Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
+
+#### -g, --gamma *value*
+Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+
+#### -n, --normalize
+Stretch histogram to reach black and white points. Recommended for most images.
+
+#### -s, --sigmoidal *value*
+Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
+
+See [Usage](#usage) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
 
 ## Examples
 
@@ -150,26 +172,28 @@ Done:             16 images
 
 ```
 
-
+See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
 
 ## Tweaking colors
 
 If you are working on linear TIFFs, e.g. as produced by [Dave Coffin's dcraw](http://cybercom.net/~dcoffin/dcraw/dcraw.1.html) by its `-4` flag, both the negative and the positive will look somehow flat, due to their linearity. The dark negative becomes a very light positive. 
 
-The *positive* utility inverses the negative TIFF to positive, and exactly now we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF. Enter `-g gamma` parameter!
+The *positive* utility inverses the negative TIFF to positive, and exactly now we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF.
 
 ### Gamma correction
 
-The `-g gamma` parameter carries the Gamma correction value to apply. It is highly recommended to use this parameter with *-n*. 
+In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human-driven image editing, so we use “common” gamma values like 2.2 here. Internally, the script then calculates the reciprocal value (0.45) for darkening.
 
-(In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human image editing, we use “normal” `-g 2.2` here. Internally, the script then calculates the reciprocal value (0.45) for darkening.)
+The `--gamma` or `-g` option carries the Gamma correction value to apply. It is highly recommended to use this parameter with `--normalize` or `-n`. 
+
 
 
 ```bash
-positive -a -d -n -g 2.2 -o gamma-corrected
+positive -adn --gamma 2.2 -o gamma-corrected
+positive -adn -g 2.2 -o gamma-corrected
 ```
  
-**The gamma values you choose are completely up to your taste and, moreover, the negative density as a result of your film development workflow!** Examples for typical values are:
+**The gamma values you choose are completely up to your taste and, moreover, both the negative density resulting from your film development workflow and your chosen exposure on digitalization!** Examples for typical values are:
  
 gamma | description
 :-----|:----------
@@ -185,16 +209,16 @@ Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamm
 
 ### Sigmoidal contrast 
 
-While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and lighter shadows, leaving the 50% midtone alone. With the `-s value` parameter you can apply a s-like curve to enhance the contrast.
-
-Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
+While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and lighter shadows, leaving the 50% midtone alone. With the `--sigmoidal value` or `-s value` option you can apply a s-like curve to enhance the contrast. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
 
 ```bash
-positive -a -d -n -g 3.6 -s 5 -o nice-contrasts
+positive -adn --g 3.6 --sigmoidal 5 -o nice-contrasts
+positive -adn --g 3.6 -s 5 -o nice-contrasts
 ```
 
 Read more: [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#sigmoidal)
 
+See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
 
 
 
@@ -232,6 +256,35 @@ Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` 
 
 
 
+# Changelog
+
+## New Features
+
+### v1.1.0
+- **Long option names** for those preferring self-explanatory options like `--resize`, `--desaturate` and so on.
+- **Improved code quality:** Wrapped main features in single functions; Adhere to Bash best practices and coding standards.
+
+
+
+## Upcoming Features
+
+These features go into the current major version 1:
+
+- **Star rating filter:** Many photo managers like Lightroom or Bridge let their users reject bad images or rate better ones with ‘stars’. *linear-tiff* will get a new CLI option flag to set a minimum rating level. 
+
+- **Custom configuration files:** Would it not be fine if users could store their favourite options in a configuration file? `~/.negativesrc` or ` ~/positive.conf` or even an *INI, YAML* or *JSON?*
+
+
+
+## Roadmap to version 2
+
+
+- **The *-r* option will be renamed to *-w*,** as *-r* is more natural for the upcoming *Rating filter*, and so is *-w* for *width*.
+
+- **The *-f* option will be renamed to *-m*,** as the actually performed image action is *mirroring horizontally or vertically*. The option values *flip, flop* and *flipflop* will then become something like *V*, *H* or *VH*.
+
+- **New batch mode trigger:** New sub-command `all` will replace the current `-a` flag, like so: `linear-tiff batch <options>`. 
+
 
 
 
@@ -250,3 +303,9 @@ $ brew remove imagemagick
 $ brew install little-cms2 imagemagick --with-little-cms2
 ```
 
+
+# Development and Contribution
+
+```bash
+$ git clone https://github.com/tomkyle/negatives-positive.git
+```
