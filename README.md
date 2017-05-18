@@ -95,11 +95,11 @@ See [Usage](#usage) · [Examples](#xamples) · [Gamma correction](#gamma-correct
 ## Examples
 
 ### Single mode: Turn some TIFF files into positive.
-Given your photographed negative is a B/W image, we use desaturation.
-
-The result will be a grayscale TIFF with approriate ICC profile. *Please note that the positive image gets a `-positive` suffix when it is stored in the same directory like the original image.*
+Given your photographed negative is a B/W image, so we are using desaturation and grayscaling here. The result will be a grayscale TIFF with approriate ICC profile. *Please note that the positive image gets a `-positive` suffix when it is stored in the same directory like the original image.*
 
 ```bash
+# These are equal:
+$ positive --desaturate DSC_0123.tif
 $ positive -d DSC_0123.tif
 ```
 
@@ -110,9 +110,10 @@ Create positive image: Done.
 Result: DSC_0123-positive.tif
 ```
 
-Again, we use desaturation, and this time the positives go into a subdirectory. The results are now stored in a `foobar` directory (Note: no `-positive` suffix).
+**Second example:** Again, we use desaturation, and this time the positives go into a subdirectory. The results are now stored in a `foobar` directory (Note: no `-positive` suffix).
 
 ```bash
+$ positive -d --output foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 $ positive -d -o foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 ```
 
@@ -136,14 +137,15 @@ Result: foobar/DSC_0125.tiff
 
 ### Batch mode: Convert *all* TIFF files in the current directory
 
-Just pass `-a` parameter, and the script will mangle everything that has a TIFF file extension: `tif, tiff, TIF, TIFF` etc.
+Just pass `--all` or `-a` option, and the script will mangle everything that has a TIFF extension: `tif, tiff, TIF, TIFF` etc.
 
 The batch mode uses [GNU Parallel,](https://www.gnu.org/software/parallel/) so every single CPU core will be used. So if you have a Quadcore CPU, four images will be processed at the same time. Great timesaver!
 
-Since normalizing is a good idea, we use the `-n` option in addition to desaturation with `-d`.
+Since normalizing is a good idea, we use the `--normalize` or `-n` option in addition to desaturation with `-d`.
 
 ```bash
-$ positive -a -d -n -o results
+$ positive --all -d -n -o results
+$ positive -adn -o results
 ```
 
 ```
@@ -178,11 +180,11 @@ See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma cor
 
 If you are working on linear TIFFs, e.g. as produced by [Dave Coffin's dcraw](http://cybercom.net/~dcoffin/dcraw/dcraw.1.html) by its `-4` flag, both the negative and the positive will look somehow flat, due to their linearity. The dark negative becomes a very light positive. 
 
-The *positive* utility inverses the negative TIFF to positive, and exactly now we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF.
+The *positive* utility inverses the negative TIFF to positive, *and exactly now* we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF—with the difference that we can choose the gamma as we like. 
 
-### Gamma correction
+### Gamma correction: adjusting midtones
 
-In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human-driven image editing, so we use “common” gamma values like 2.2 here. Internally, the script then calculates the reciprocal value (0.45) for darkening.
+In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human-driven image editing, it is easier to talk about  “common” gamma values like 2.2 here. Internally, the script then calculates the reciprocal value (0.45) for darkening.
 
 The `--gamma` or `-g` option carries the Gamma correction value to apply. It is highly recommended to use this parameter with `--normalize` or `-n`. 
 
@@ -193,7 +195,16 @@ positive -adn --gamma 2.2 -o gamma-corrected
 positive -adn -g 2.2 -o gamma-corrected
 ```
  
-**The gamma values you choose are completely up to your taste and, moreover, both the negative density resulting from your film development workflow and your chosen exposure on digitalization!** Examples for typical values are:
+#### Which gamma value to choose?
+ 
+**The gamma value is completely up to your taste.** The appropriate gamma value is influenced by these two factors:
+
+- **The negative density** which results from your film development workflow,  
+  i.e. its natural contrast and blackness
+- **The digicam exposure** chosen during digitalization,  
+  i.e. how light or dark is your photo from the negative.
+
+Examples for typical values (according to my personal workflow):
  
 gamma | description
 :-----|:----------
@@ -207,9 +218,9 @@ gamma | description
 
 Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamma_correction) [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#level_gamma)
 
-### Sigmoidal contrast 
+### Sigmoidal contrast for highlights and shadows 
 
-While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and lighter shadows, leaving the 50% midtone alone. With the `--sigmoidal value` or `-s value` option you can apply a s-like curve to enhance the contrast. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
+While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and shadows, leaving the 50% midtone alone and resulting in a non-linear, s-like curve. Use the `--sigmoidal value` or `-s value` option to enhance the contrast. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
 
 ```bash
 positive -adn --g 3.6 --sigmoidal 5 -o nice-contrasts
@@ -231,7 +242,7 @@ See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma cor
 When photographing your negatives, you'll probably use a negatives (film) holder. 
 
 - The edges of your RAW photo usually will then have a black frame.  
-- If the window of your negative holder is larger than the negative, your image will also show unlit film areas (i.e., spaces between the single negative frames), resulting in another “white“ frame.
+- If the window of your negative holder is larger than the negative, your image will also show unlit film areas (i.e., spaces between the single negative frames), resulting in another “white“ frame. These unlit areas will become ‘absolute black’ in your positives version.
 
 ### Valid approaches
 
@@ -244,7 +255,7 @@ Start cropping your images and save them as TIF. Be sure to preserve the ICC pro
 Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` parameter for normalizing colors, both the black and white points will be determined by *the information in your image.* Consequences are: 
 
 0. The higher gamma value or sigmoidal contrast you use, the earlier deepest shadows and lights will start blocking.
-0. Underexposured or overexposured images are normalized and may loose their “natural” look. Flat images may show more film grain.
+0. Underexposured or overexposured images are normalized, that is ‘stretched to histogram edges‘, and may loose their generic underexposured or overexposured look. Images being flat in original may show more film grain.
 
 
 #### Approach: Do not crop
@@ -286,22 +297,14 @@ These features go into the current major version 1:
 - **New batch mode trigger:** New sub-command `all` will replace the current `-a` flag, like so: `linear-tiff batch <options>`. 
 
 
+# Issues and FAQ
+
+To see the full list, head over to the [issues page.](https://github.com/tomkyle/negatives-positive/issues)
 
 
+**I get a error message “mogrify: delegate library support not built-in”**  
+ImageMagick must be compiled with litte-cms2 support. See [issue#1](https://github.com/tomkyle/negatives-positive/issues/1) for details. 
 
-
-# Problems and FAQ
-
-###Message “mogrify: delegate library support not built-in”
-
-`mogrify: delegate library support not built-in './foobar.tiff' (LCMS) @ warning/profile.c/ProfileImage/837.`
-
-*mogrify* is part of ImageMagick, an the *delegate library* is part of [LitteCMS](http://www.littlecms.com/). Your local ImageMagick must be compiled *with little-cms2* support. Reinstall imagemagick according to this [solution](https://github.com/Homebrew/legacy-homebrew/issues/16619):
-
-```bash
-$ brew remove imagemagick
-$ brew install little-cms2 imagemagick --with-little-cms2
-```
 
 
 # Development and Contribution
