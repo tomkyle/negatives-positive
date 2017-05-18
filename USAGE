@@ -13,22 +13,26 @@ USAGE:        Batch mode: Process all TIFF files in current directory:
               $ positive [OPTIONS] FILE [other FILE(s)]
 
 OPTIONS:
--a            Use batch mode, process any TIFF file in working directory.
+-a, --all     Use batch mode, process any TIFF file in working directory.
 
--d            Desaturate colors, recommended for B/W neagtives.
+-d, --desaturate
+              Desaturate colors, recommended for B/W neagtives.
               Bonus: The TIFF will be converted to 16 bit Grayscale,
               saving up to 60% in file size; The image will have
               linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
 
--f direction  Mirror the image vertically or horizontally.
+-f direction, --flipflop direction
+              Mirror the image vertically or horizontally.
               Possible values are:
 
-              flip - mirror upside-down
-              flop - mirror in the horizontal direction
-                     This is the way to go when your negatives
-                     have been digitalized on their emulsion (back) side.
+              flip     - mirror upside-down
+              flop     - mirror in the horizontal direction
+                         This is the way to go when your negatives
+                         have been digitalized on their emulsion (back) side.
+              flipflop - Both directions
 
--g value      Gamma correction value to apply.
+-g value, --gamma value
+              Gamma correction value to apply.
               It is highly recommended to use this parameter with -n.
 
               Values are up to your taste and the negative density!
@@ -43,24 +47,30 @@ OPTIONS:
               4.4 - Still mellow, not too contrasty
               5.0 - Still usable results with uncropped negatives
 
--j quality    Convert to JPG, using this JPG quality.
+-j quality, --jpg quality
+              Convert to JPG, using this JPG quality.
                 0: Do not convert. Same as omitting this parameter.
                92: overall best quality.
               100: nearly useless best quality.
 
--n            Normalize: Stretch histogram to reach black and white points.
+-n, --normalize
+              Normalize: Stretch histogram to reach black and white points.
               Recommended for most images.
 
--o path       Output directory; Default is current working dir.
+-o path, --output path
+              Output directory; Default is current working dir.
 
--r pixel      Resize larger side to this pixel length, preserving aspect ratio.
+-r pixel, --resize
+              Resize larger side to this pixel length, preserving aspect ratio.
 
--s value      Sigmoidal contrast value around 50% middle-gray.
+-s value, --sigmoidal
+              Sigmoidal contrast value around 50% middle-gray.
               Increases the contrast without saturating highlights or shadows.
               Quoted from ImageMagick docs: "3 is typical and 20 is a lot."
               Disabled if omitted.
 
--v            Turn on verbous mode.
+-v, --verbous
+              Turn on verbous mode.
 
 HOMEPAGE:     <https://github.com/tomkyle/negatives-positive>
 
