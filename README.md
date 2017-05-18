@@ -182,9 +182,9 @@ If you are working on linear TIFFs, e.g. as produced by [Dave Coffin's dcraw](ht
 
 The *positive* utility inverses the negative TIFF to positive, *and exactly now* we are able to perform the very gamma correction that did not take place when `dcraw` created the linear TIFF—with the difference that we can choose the gamma as we like. 
 
-### Gamma correction: adjusting midtones
+### Gamma correction
 
-In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human-driven image editing, it is easier to talk about  “common” gamma values like 2.2 here. Internally, the script then calculates the reciprocal value (0.45) for darkening.
+**Adjust the midtones:** In fact, the light positive must be darkened, using a gamma value lesser than 1. Since such small gamma values are “uncommon” in human-driven image editing, it is easier to talk about  “common” gamma values like 2.2 here. Internally, the script then calculates the reciprocal value (0.45) for darkening.
 
 The `--gamma` or `-g` option carries the Gamma correction value to apply. It is highly recommended to use this parameter with `--normalize` or `-n`. 
 
@@ -218,9 +218,9 @@ gamma | description
 
 Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamma_correction) [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#level_gamma)
 
-### Sigmoidal contrast for highlights and shadows 
+### Sigmoidal contrast
 
-While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and shadows, leaving the 50% midtone alone and resulting in a non-linear, s-like curve. Use the `--sigmoidal value` or `-s value` option to enhance the contrast. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
+**Adjust highlights and shadows:** While the gamma correction mainly affects the midtones, the sigmoidal contrast control works on the highlights and shadows, leaving the 50% midtone alone and resulting in a non-linear, s-like curve. Use the `--sigmoidal value` or `-s value` option to enhance the contrast. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” – Example:
 
 ```bash
 positive -adn --g 3.6 --sigmoidal 5 -o nice-contrasts
