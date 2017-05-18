@@ -195,9 +195,7 @@ positive -adn --gamma 2.2 -o gamma-corrected
 positive -adn -g 2.2 -o gamma-corrected
 ```
  
-#### Which gamma value to choose?
- 
-**The gamma value is completely up to your taste.** The appropriate gamma value is influenced by these two factors:
+**Which gamma value to choose?** In fact, the gamma value is completely up to your taste. An appropriate gamma value will be mainly influenced by these two factors:
 
 - **The negative density** which results from your film development workflow,  
   i.e. its natural contrast and blackness
