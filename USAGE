@@ -21,7 +21,7 @@ OPTIONS:
               saving up to 60% in file size; The image will have
               linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
 
--f direction, --flipflop direction
+-f, --flipflop direction
               Mirror the image vertically or horizontally.
               Possible values are:
 
@@ -31,7 +31,7 @@ OPTIONS:
                          have been digitalized on their emulsion (back) side.
               flipflop - Both directions
 
--g value, --gamma value
+-g, --gamma value
               Gamma correction value to apply.
               It is highly recommended to use this parameter with -n.
 
@@ -47,7 +47,7 @@ OPTIONS:
               4.4 - Still mellow, not too contrasty
               5.0 - Still usable results with uncropped negatives
 
--j quality, --jpg quality
+-j, --jpg quality
               Convert to JPG, using this JPG quality.
                 0: Do not convert. Same as omitting this parameter.
                92: overall best quality.
@@ -57,13 +57,13 @@ OPTIONS:
               Normalize: Stretch histogram to reach black and white points.
               Recommended for most images.
 
--o path, --output path
+-o, --output path
               Output directory; Default is current working dir.
 
--r pixel, --resize
+-r, --resize pixel
               Resize larger side to this pixel length, preserving aspect ratio.
 
--s value, --sigmoidal
+-s, --sigmoidal value
               Sigmoidal contrast value around 50% middle-gray.
               Increases the contrast without saturating highlights or shadows.
               Quoted from ImageMagick docs: "3 is typical and 20 is a lot."
