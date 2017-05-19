@@ -559,7 +559,7 @@ function processNegatives {
           # ---------------------------------------
 
           if [ -f "${output_tiff}" ]; then
-            e_result "$(printf "Result: %s$" "${output_tiff}")"
+            e_result "$(printf "Result: %s" "${output_tiff}")"
           fi;
 
         fi
