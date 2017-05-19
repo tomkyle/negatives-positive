@@ -279,16 +279,16 @@ Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` 
 
 These features go into the current major version 1:
 
-- **Star rating filter:** Many photo managers like Lightroom or Bridge let their users reject bad images or rate better ones with ‘stars’. *linear-tiff* will get a new CLI option flag to set a minimum rating level. 
+- **Star rating filter:** Many photo managers like Lightroom or Bridge let their users reject bad images or rate better ones with ‘stars’. *linear-tiff* should get a new CLI option flag to set a minimum rating level. Feel free to discuss this in [issue #6.](https://github.com/tomkyle/negatives-positive/issues/6)
 
-- **Custom configuration files:** Would it not be fine if users could store their favourite options in a configuration file? `~/.negativesrc` or ` ~/positive.conf` or even an *INI, YAML* or *JSON?*
+- **Custom configuration files:** Would it not be fine if users could store their favourite options in a configuration file? `~/.negativesrc` or ` ~/positive.conf` or even an *INI, YAML* or *JSON?* Head over to the corresponding [issue #7.](https://github.com/tomkyle/negatives-positive/issues/7)
 
 
 
 ## Roadmap to version 2
 
 
-- **The *-r* option will be renamed to *-w*,** as *-r* is more natural for the upcoming *Rating filter*, and so is *-w* for *width*.
+- **The *-r* option will be renamed to *-w*,** as *-r* is more natural for the upcoming *Rating filter*, and so is *-w* for *width*. 
 
 - **The *-f* option will be renamed to *-m*,** as the actually performed image action is *mirroring horizontally or vertically*. The option values *flip, flop* and *flipflop* will then become something like *V*, *H* or *VH*.
 
