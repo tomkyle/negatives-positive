@@ -300,7 +300,7 @@ function runBatchMode {
     # Start parallel processing
     # ---------------------------------------
     printf "Process these %s images, using GNU Parallel:\n" "${number_of_images}"
-    e_verbous "$(cat "${TODO_TXT}")"
+    e_verbous "$(column "${TODO_TXT}")"
     parallel "$0" "${FUNC_ARGUMENTS[@]}" {} < "${TODO_TXT}"
 
 
