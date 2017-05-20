@@ -82,7 +82,7 @@ Verbous mode — show some more information under way.
 Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
 
 #### -g, --gamma *value*
-Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Pass a float value like `2.4` or `auto`. *Auto* will apply a calculated -gamma adjustment based on the mean values of an image. Examples: `-g 2.2` and `--gamma auto`
+Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Pass a float value like `2.4` or `auto`. *Auto* will apply a calculated gamma adjustment based on the mean values of an image. Examples: `-g 2.2` and `--gamma auto`
 
 #### -n, --normalize
 Stretch histogram to reach black and white points. Recommended for most images.

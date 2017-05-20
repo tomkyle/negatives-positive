@@ -38,7 +38,7 @@ OPTIONS:
               Values are up to your taste and the negative density!
               Examples for typical values are:
 
-              auto - Calculated amma based on image mean values.
+              auto - Calculated gamma based on image mean values.
                      Recommended for ‘real life images’.
               1.0  - No Gamma for linear TIFFs.
                      This is the default value if omitted.
