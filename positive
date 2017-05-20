@@ -415,14 +415,22 @@ function processNegatives {
 
 
     #  Apply Gamma, if required.
-    #  Having colors normalized with -n parameter
-    #  is heavily recommended.
-    if [ "${gamma}" != "${GAMMA_DEFAULT}" ]; then
-      GAMMA_VALUE=$(echo "1 ${gamma}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}')
-      mogrify_options="${mogrify_options} -gamma ${GAMMA_VALUE}";
+    #  Having colors normalized with -n parameter is heavily recommended.
+    #
+    #  Quoted from IM docs:
+    #  Setting gamma to "auto" calculates the mean values of an image, then applies a calculated -gamma adjustment
+    #  so that is the mean color exists in the image it will get a have a value of 50%.
+    if [ "${gamma}" = "auto" ]; then
+      mogrify_options="${mogrify_options} -auto-gamma -auto-level"
+      RESULT_SUFFIX="${RESULT_SUFFIX}-autogamma"
+    else
+      if [ "${gamma}" != "${GAMMA_DEFAULT}" ]; then
+        GAMMA_VALUE=$(echo "1 ${gamma}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}')
+        mogrify_options="${mogrify_options} -gamma ${GAMMA_VALUE}";
 
-      # Append to suffix
-      RESULT_SUFFIX="${RESULT_SUFFIX}-g${gamma/./}"
+        # Append to suffix
+        RESULT_SUFFIX="${RESULT_SUFFIX}-g${gamma/./}"
+      fi
     fi
 
 
