@@ -38,14 +38,16 @@ OPTIONS:
               Values are up to your taste and the negative density!
               Examples for typical values are:
 
-              1.0 - No Gamma for linear TIFFs.
-                    This is the default value if omitted.
-              1.8 - Moderate darkening, resulting in light images
-              2.2 - Well-known software standard;
-                    This is what common photo software would apply.
-              3.6 - Smooth tones, not too light
-              4.4 - Still mellow, not too contrasty
-              5.0 - Still usable results with uncropped negatives
+              auto - Calculated amma based on image mean values.
+                     Recommended for ‘real life images’.
+              1.0  - No Gamma for linear TIFFs.
+                     This is the default value if omitted.
+              1.8  - Moderate darkening, resulting in light images
+              2.2  - Well-known software standard;
+                     This is what common photo software would apply.
+              3.6  - Smooth tones, not too light
+              4.4  - Still mellow, not too contrasty
+              5.0  - Still usable results with uncropped negatives
 
 -j, --jpg quality
               Convert to JPG, using this JPG quality.

@@ -82,7 +82,7 @@ Verbous mode — show some more information under way.
 Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
 
 #### -g, --gamma *value*
-Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Example: `-g 2.2`
+Gamma correction value to apply. It is highly recommended to use this parameter with linear TIFF images, together with **-n**. Pass a float value like `2.4` or `auto`. *Auto* will apply a calculated -gamma adjustment based on the mean values of an image. Examples: `-g 2.2` and `--gamma auto`
 
 #### -n, --normalize
 Stretch histogram to reach black and white points. Recommended for most images.
@@ -206,6 +206,7 @@ Examples for typical values (according to my personal workflow):
  
 gamma | description
 :-----|:----------
+auto | Calculated gamma, based on mean values. Recommended for ‘real life images’.
 1.0 | No Gamma for linear TIFFs. This is the default value if omitted.
 1.8 | Moderate darkening, resulting in overall light images
 2.2 | Well-known software standard; This is what common photo software would apply.
@@ -214,7 +215,7 @@ gamma | description
 ... | Try your own!
 
 
-Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamma_correction) [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#level_gamma)
+Read more about Gamma correction: [Wikipedia](https://en.wikipedia.org/wiki/Gamma_correction) and ImageMagick: [Gamma Adjustments](http://www.imagemagick.org/Usage/color_mods/#level_gamma) and [auto-gamma.](http://www.imagemagick.org/script/command-line-options.php?#auto-gamma)
 
 ### Sigmoidal contrast
 
@@ -279,7 +280,7 @@ Run *positive* with gamma and sigmoidal contrast as needed. When using the `-n` 
 
 These features go into the current major version 1:
 
-- **Star rating filter:** Many photo managers like Lightroom or Bridge let their users reject bad images or rate better ones with ‘stars’. *linear-tiff* should get a new CLI option flag to set a minimum rating level. Feel free to discuss this in [issue #6.](https://github.com/tomkyle/negatives-positive/issues/6)
+- **Star rating filter:** Many photo managers like Lightroom or Bridge let their users reject bad images or rate better ones with ‘stars’. *positive* should get a new CLI option flag to set a minimum rating level. Feel free to discuss this in [issue #6.](https://github.com/tomkyle/negatives-positive/issues/6)
 
 - **Custom configuration files:** Would it not be fine if users could store their favourite options in a configuration file? `~/.negativesrc` or ` ~/positive.conf` or even an *INI, YAML* or *JSON?* Head over to the corresponding [issue #7.](https://github.com/tomkyle/negatives-positive/issues/7)
 
