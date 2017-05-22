@@ -282,6 +282,11 @@ _require_argument() {
 # ======================================
 
 function runBatchMode {
+
+    # ---------------------------------------
+    # Requirements
+    # ---------------------------------------
+
     # Homebrew requirements
     require parallel
 
@@ -380,6 +385,11 @@ function applyMogrify {
 #    convertToJpeg <input_file> <convert_options> <output_file.jpg>
 # ======================================
 function convertToJpeg {
+
+    # --------------------------------------
+    # Requirements
+    # --------------------------------------
+
     # Homebrew dependencies
     require convert
 
@@ -424,11 +434,7 @@ function processNegatives {
     # System commands
     require awk
 
-
-    # --------------------------------------
     # Files to work on.
-    # --------------------------------------
-
     local -r INPUT_FILES=("${@}")
 
 
@@ -436,8 +442,6 @@ function processNegatives {
     # --------------------------------------
     # Output contrast settings
     # --------------------------------------
-
-
 
 
     # Percentage of histogram edges to be truncated.
