@@ -171,8 +171,8 @@ function e_success () {
 }
 
 function e_result () {
-  #echo -e "${C_GREEN}${*}${NC}"
-  printf "${C_GREEN}%s${NC}\n" "${*}"
+  echo -e "${C_GREEN}${*}${NC}"
+  #printf "${C_GREEN}%s${NC}" "${*}"
 }
 
 function e_verbous () {
@@ -317,7 +317,7 @@ function runBatchMode {
 
     if [ $verbous_mode -gt 0 ]; then
         printf "Process these %s images, using GNU Parallel:\n" "${number_of_images}"
-        printf "${C_GRAY}%s\n\n${NC}" "$(column "${TODO_TXT}")"
+        printf "${C_GRAY}%s\n${NC}" "$(column "${TODO_TXT}")"
     fi
 
     parallel "$0" "${FUNC_ARGUMENTS[@]}" {} < "${TODO_TXT}"
@@ -330,7 +330,7 @@ function runBatchMode {
     # Some stats
     local -r ELAPSED_TIME=$((SECONDS - START_TIME))
 
-    echo "Some stats:"
+    printf "\nSome stats:"
     printf "CPUs used:     %s\n"          "${CPUs}"
     printf "Elapsed time:  %smin %ssec\n" $((ELAPSED_TIME/60)) $((ELAPSED_TIME%60))
     printf "Done:          %s images\n"   "${number_of_images}"
@@ -604,7 +604,7 @@ function processNegatives {
         local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
         local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
 
-        e_info "$(printf "BBB%s\n" "${INPUT_TIFF}")"
+        e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
 
         # ---------------------------------------
         #  Do 'real' inversion and image editing
