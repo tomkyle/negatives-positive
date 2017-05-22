@@ -333,6 +333,7 @@ function applyMogrify {
     local output_tiff="${1}"; shift
     local output_jpeg="${1}"; shift
 
+
     # ---------------------------------------
     # Just in case $INPUT_TIFF is NOT a regular file
     # ---------------------------------------
@@ -371,6 +372,14 @@ function convertToJpeg {
     local jpeg_quality="${1}"; shift
     local output_jpeg="${1}"; shift
 
+    # ---------------------------------------
+    # Just in case $output_tiff is NOT a regular file
+    # ---------------------------------------
+    if [ ! -f "${output_tiff}" ]; then
+        e_error "$(printf '%s is not a regular file.' "${output_tiff}")"
+    fi
+
+
     e_verbous "$(echo;)"
     printf "Convert to JPG (sRGB; quality %s): " "${jpeg_quality}"
 
@@ -388,7 +397,6 @@ function convertToJpeg {
         e_success
         rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
     }
-
 }
 
 # ======================================
