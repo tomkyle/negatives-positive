@@ -327,7 +327,10 @@ function runBatchMode {
 # ======================================
 
 function applyMogrify {
+    # Homebrew dependencies
+    require mogrify
 
+    # Parameters
     local INPUT_TIFF="${1}"; shift
     local mogrify_options="${1}"; shift
     local output_tiff="${1}"; shift
@@ -365,11 +368,15 @@ function applyMogrify {
 #  convertToJpeg
 #
 #  Usage:
-#    convertToJpeg <input_file> <jpeg_quality> <output_file.jpg>
+#    convertToJpeg <input_file> <convert_options> <output_file.jpg>
 # ======================================
 function convertToJpeg {
+    # Homebrew dependencies
+    require convert
+
+    # Parameters
     local output_tiff="${1}"; shift
-    local jpeg_quality="${1}"; shift
+    local convert_options="${1}"; shift
     local output_jpeg="${1}"; shift
 
     # ---------------------------------------
@@ -379,25 +386,11 @@ function convertToJpeg {
         e_error "$(printf '%s is not a regular file.' "${output_tiff}")"
     fi
 
-
-    # ---------------------------------------
-    # Build convert options string
-    # ---------------------------------------
-
-    # JPG quality
-    local convert_options=" -quality ${jpeg_quality}"
-
-    # Convert to sRGB
-    local srgb_v4_appearance_profile
-    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
-    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
-
-
     # ---------------------------------------
     # Call convert
     # ---------------------------------------
     e_verbous "$(echo;)"
-    printf "Convert to JPG (sRGB; quality %s): " "${jpeg_quality}"
+    printf "Convert to JPG: "
     e_verbous "$(printf "\nconvert %s\n..." "${convert_options}")"
 
     convert "${output_tiff}" ${convert_options} "${output_jpeg}" && {
@@ -417,8 +410,8 @@ function processNegatives {
     # --------------------------------------
 
     # Homebrew dependencies
-    require mogrify
-    require convert
+    # require convert
+    # require mogrify
     require parallel
     require color-profiles
 
@@ -537,6 +530,21 @@ function processNegatives {
 
 
     # ---------------------------------------
+    # Build convert options string
+    # ---------------------------------------
+    local convert_options=""
+    if [ $jpeg_quality -gt 0 ]; then
+        # JPG quality
+        convert_options+=" -quality ${jpeg_quality}"
+
+        # Convert to sRGB
+        local srgb_v4_appearance_profile
+        srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
+        convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+    fi
+
+
+    # ---------------------------------------
     # Create output directory if needed.
     # ---------------------------------------
     if [ "${output_directory}" != "${PWD}" ]; then
@@ -613,8 +621,14 @@ function processNegatives {
         fi
 
         # So JPEG conversion is required:
-        convertToJpeg "${output_tiff}" "${jpeg_quality}" "${output_jpeg}"
-        e_result "$(printf "Result: %s" "${output_jpeg}")"
+        (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") && {
+            e_result "$(printf "Result: %s" "${output_jpeg}")"
+        } || {
+            if [ -f "${output_tiff}" ]; then
+                e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+            fi
+        }
+
 
 
 
