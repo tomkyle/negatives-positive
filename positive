@@ -352,11 +352,10 @@ function applyMogrify {
     input_file_basename="${input_file_basename##*/}" # remove trailing slash
 
     local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
-    output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
+    local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
 
     # Create workfile to work on with mogrify
     cp "${INPUT_TIFF}" "${output_tiff}"
-
 
 
 
