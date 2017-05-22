@@ -371,10 +371,9 @@ function applyMogrify {
     # ---------------------------------------
     e_verbous "$(echo;)"
     printf "Create positive image: "
-    e_verbous "$(printf "\nmogrify %s\n..." "${mogrify_options}")"
+    e_verbous "$(printf "\nmogrify %s " "${mogrify_options}")"
 
     mogrify ${mogrify_options} "${output_tiff}" && e_success ""
-    e_verbous "$(echo;)"
 }
 
 
@@ -410,7 +409,7 @@ function convertToJpeg {
     # ---------------------------------------
     e_verbous "$(echo;)"
     printf "Convert to JPG: "
-    e_verbous "$(printf "\nconvert %s\n..." "${convert_options}")"
+    e_verbous "$(printf "\nconvert %s " "${convert_options}")"
 
     convert "${output_tiff}" ${convert_options} "${output_jpeg}" && {
         e_success
@@ -624,13 +623,13 @@ function processNegatives {
         # Do nothing else if JPEG conversion not required
         # ---------------------------------------
         if [ $jpeg_quality -eq 0 ]; then
-            e_result "$(printf "Result: %s" "${output_tiff}")"
+            e_result "$(printf "\nResult: %s" "${output_tiff}")"
             continue
         fi
 
         # So JPEG conversion is required:
         (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") && {
-            e_result "$(printf "Result: %s" "${output_jpeg}")"
+            e_result "$(printf "\nResult: %s" "${output_jpeg}")"
         } || {
             if [ -f "${output_tiff}" ]; then
                 e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
