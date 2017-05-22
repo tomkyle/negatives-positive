@@ -356,14 +356,10 @@ function applyMogrify {
     # ---------------------------------------
     e_verbous "$(echo;)"
     printf "Create positive image: "
-
-    if [ $verbous_mode -eq 1 ]; then
-      e_verbous "$(printf "\nmogrify %s\n..." "${mogrify_options}")"
-    fi
+    e_verbous "$(printf "\nmogrify %s\n..." "${mogrify_options}")"
 
     mogrify ${mogrify_options} "${output_tiff}" && e_success ""
     e_verbous "$(echo;)"
-
 }
 
 
