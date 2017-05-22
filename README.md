@@ -43,7 +43,7 @@ Open your terminal application and go to your images directory. *positive* will 
 $ positive [options] [-a | file(s)]
 ```
 
-See [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [Workflow Recommendations](#workflow-recommendations)
+See [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [Workflow Recommendations](#workflow-recommendations) · [**Issues and FAQ**](#issues-and-faq)
 
 ## Options
 
@@ -90,7 +90,7 @@ Stretch histogram to reach black and white points. Recommended for most images.
 #### -s, --sigmoidal *value*
 Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
 
-See [Usage](#usage) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
+See [Usage](#usage) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [**Issues and FAQ**](#issues-and-faq)
 
 ## Examples
 
@@ -174,7 +174,7 @@ Done:             16 images
 
 ```
 
-See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
+See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [**Issues and FAQ**](#issues-and-faq)
 
 ## Tweaking colors
 
@@ -228,7 +228,7 @@ positive -adn --g 3.6 -s 5 -o nice-contrasts
 
 Read more: [ImageMagick](http://www.imagemagick.org/Usage/color_mods/#sigmoidal)
 
-See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast)
+See [Usage](#usage) · [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [**Issues and FAQ**](#issues-and-faq)
 
 
 
@@ -300,6 +300,8 @@ These features go into the current major version 1:
 
 To see the full list, head over to the [issues page.](https://github.com/tomkyle/negatives-positive/issues)
 
+**Invalid output profile after converting linear Grayscale TIFFs to positive.**  
+Adobe CC Bridge won't render preview image and Photoshop complains about invalid ICC profile. Current workaround is to use `--desaturate` also on grayscale linear TIFFs. Stay tuned: [issue#8](https://github.com/tomkyle/negatives-positive/issues/8)
 
 **I get a error message “mogrify: delegate library support not built-in”**  
 ImageMagick must be compiled with litte-cms2 support. See [issue#1](https://github.com/tomkyle/negatives-positive/issues/1) for details. 
