@@ -383,7 +383,7 @@ function applyMogrify {
       printf "Convert to JPG (sRGB; quality %s): " "${jpeg_quality}"
 
       # JPG quality
-      convert_options=" -quality ${jpeg_quality}"
+      local convert_options=" -quality ${jpeg_quality}"
 
       # Convert to sRGB
       local srgb_v4_appearance_profile
