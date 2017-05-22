@@ -330,7 +330,7 @@ function runBatchMode {
     # Some stats
     local -r ELAPSED_TIME=$((SECONDS - START_TIME))
 
-    printf "\nSome stats:"
+    printf "\nSome stats:\n"
     printf "CPUs used:     %s\n"          "${CPUs}"
     printf "Elapsed time:  %smin %ssec\n" $((ELAPSED_TIME/60)) $((ELAPSED_TIME%60))
     printf "Done:          %s images\n"   "${number_of_images}"
