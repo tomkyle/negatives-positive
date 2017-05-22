@@ -334,11 +334,10 @@ function applyMogrify {
     local output_jpeg="${1}"; shift
 
     # ---------------------------------------
-    # Just in case $RAW_PHOTO is NOT a regular file
+    # Just in case $INPUT_TIFF is NOT a regular file
     # ---------------------------------------
     if [ ! -f "${INPUT_TIFF}" ]; then
-        e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
-        continue;
+        e_error "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
     fi
 
 
@@ -570,6 +569,14 @@ function processNegatives {
 
     for INPUT_TIFF in "${INPUT_FILES[@]}"
     do
+
+        # ---------------------------------------
+        # Plausibility check
+        # ---------------------------------------
+        if [ ! -f "${INPUT_TIFF}" ]; then
+            e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
+            continue;
+        fi
 
         # ---------------------------------------
         # Filename magic
