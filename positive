@@ -341,14 +341,11 @@ function applyMogrify {
     fi
 
 
-    e_info "$(printf "%s\n" "${INPUT_TIFF}")"
-
-
     # ---------------------------------------
     # Create workfile to work on with mogrify
     # ---------------------------------------
+    e_info "$(printf "%s\n" "${INPUT_TIFF}")"
     cp "${INPUT_TIFF}" "${output_tiff}"
-
 
 
     # ---------------------------------------
