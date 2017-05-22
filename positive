@@ -323,14 +323,15 @@ function runBatchMode {
 #  applyMogrify
 #
 #  Usage:
-#    applyMogrify <input_file> <mogrify_options> <output_directory>
+#    applyMogrify <input_file> <mogrify_options> <output_tiff> <output_jpeg>
 # ======================================
 
 function applyMogrify {
 
     local INPUT_TIFF="${1}"; shift
     local mogrify_options="${1}"; shift
-    local output_directory="${1}"; shift
+    local output_tiff="${1}"; shift
+    local output_jpeg="${1}"; shift
 
     # ---------------------------------------
     # Just in case $RAW_PHOTO is NOT a regular file
@@ -345,16 +346,8 @@ function applyMogrify {
 
 
     # ---------------------------------------
-    # Filename magic
-    # ---------------------------------------
-    local input_file_extension="${INPUT_TIFF##*.}";
-    local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
-    input_file_basename="${input_file_basename##*/}" # remove trailing slash
-
-    local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
-    local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
-
     # Create workfile to work on with mogrify
+    # ---------------------------------------
     cp "${INPUT_TIFF}" "${output_tiff}"
 
 
@@ -584,8 +577,20 @@ function processNegatives {
 
     for INPUT_TIFF in "${INPUT_FILES[@]}"
     do
+
+        # ---------------------------------------
+        # Filename magic
+        # ---------------------------------------
+        local input_file_extension="${INPUT_TIFF##*.}";
+        local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
+        input_file_basename="${input_file_basename##*/}" # remove trailing slash
+
+        local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
+        local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
+
         echo $DIVIDER_LINE
-        applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_directory}"
+        applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}"
+
         echo;
     done
 
