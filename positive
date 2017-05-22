@@ -29,6 +29,18 @@ set -o pipefail # Pipelines produce failure return code if any command errors.
 
 
 # --------------------------------------
+# Global Requirements
+# --------------------------------------
+function require  {
+    command -v "${1}" >/dev/null 2>&1 || e_error "$(printf "Program '%s' required, but it's not installed" "${1}")"
+}
+
+# System commands
+require brew
+require dirname
+require basename
+
+# --------------------------------------
 # Global settings
 # --------------------------------------
 
@@ -41,6 +53,7 @@ function trapCleanupTempDir() {
     fi
 }
 trap trapCleanupTempDir EXIT SIGINT
+
 
 
 # Files to work on
@@ -179,16 +192,6 @@ function createTodoFile {
 }
 
 
-# --------------------------------------
-# Check if given command is installed, exit otherwise
-#
-# Usage:
-#   require <command>
-# --------------------------------------
-function require  {
-    command -v "${1}" >/dev/null 2>&1 || e_error "$(printf "Program '%s' required, but it's not installed" "${1}")"
-}
-
 
 
 # --------------------------------------
@@ -279,6 +282,12 @@ _require_argument() {
 # ======================================
 
 function runBatchMode {
+    # Homebrew requirements
+    require parallel
+
+    # System commands
+    require getconf
+
     # Stores all function parameters for use with GNU Parallel
     local -r FUNC_ARGUMENTS=("${@}")
 
@@ -410,17 +419,9 @@ function processNegatives {
     # --------------------------------------
 
     # Homebrew dependencies
-    # require convert
-    # require mogrify
-    require parallel
     require color-profiles
 
     # System commands
-    require getconf
-    require brew
-    require dirname
-    require basename
-    require getopts
     require awk
 
 
