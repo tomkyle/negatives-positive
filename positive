@@ -380,8 +380,9 @@ function convertToJpeg {
     fi
 
 
-    e_verbous "$(echo;)"
-    printf "Convert to JPG (sRGB; quality %s): " "${jpeg_quality}"
+    # ---------------------------------------
+    # Build convert options string
+    # ---------------------------------------
 
     # JPG quality
     local convert_options=" -quality ${jpeg_quality}"
@@ -391,6 +392,12 @@ function convertToJpeg {
     srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
     convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
 
+
+    # ---------------------------------------
+    # Call convert
+    # ---------------------------------------
+    e_verbous "$(echo;)"
+    printf "Convert to JPG (sRGB; quality %s): " "${jpeg_quality}"
     e_verbous "$(printf "\nconvert %s\n..." "${convert_options}")"
 
     convert "${output_tiff}" ${convert_options} "${output_jpeg}" && {
