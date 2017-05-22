@@ -612,9 +612,12 @@ function processNegatives {
         echo $DIVIDER_LINE
 
         # ---------------------------------------
-        #  Do 'real' invrsion and image editing
+        #  Do 'real' inversion and image editing
         # ---------------------------------------
-        applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}"
+        (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
+            e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
+            continue
+        }
 
 
         # ---------------------------------------
