@@ -73,6 +73,12 @@ declare SEARCH_DIRECTORY="."
 declare GAMMA_DEFAULT=1
 
 
+# Percentage of histogram edges to be truncated.
+# The default is that 0.1 percent of the histogram entries are ignored.
+# Set to 0 to use the complete histogram.
+declare HISTOGRAM_THRESHOLD=0.1
+
+
 # Result suffix
 declare RESULT_SUFFIX=""
 declare RESULT_SUFFIX_DEFAULT="-positive"
@@ -444,29 +450,14 @@ function processNegatives {
     local -r INPUT_FILES=("${@}")
 
 
-    # --------------------------------------
-    # Output contrast settings
-    # --------------------------------------
-
-
-    # Percentage of histogram edges to be truncated.
-    # The default is that 0.1 percent of the histogram entries are ignored.
-    # Set to 0 to use the complete histogram.
-    declare HISTOGRAM_THRESHOLD=0.1
-
-
-    # --------------------------------------
-    # Default ICC profile.
-    # See DCRAW_COLORSPACE_VALUE
-    # --------------------------------------
-    local ICC_PROFILE_PATH
-    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
-
     # ---------------------------------------
+    #  Color inversion and image editing:
     #  Build mogrify's options string.
     # ---------------------------------------
-    local mogrify_options=""
-    mogrify_options="-negate"
+
+    # Start with negative to positive inversion.
+    local mogrify_options="-negate"
+
 
 
     # Flip or flop the image, if required.
@@ -524,6 +515,12 @@ function processNegatives {
     fi
 
 
+    # Color conversion:
+    # Default ICC profile.
+    # See DCRAW_COLORSPACE_VALUE
+    local ICC_PROFILE_PATH
+    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
+
     #  Desaturate colors, if required:
     #  Equivalent to ImageMagick's "-grayscale rec709luma"
     #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
@@ -535,12 +532,14 @@ function processNegatives {
     mogrify_options+=" -profile ${ICC_PROFILE_PATH}"
 
 
+
     #  Compress image
     mogrify_options+=" -compress Zip "
 
 
     # ---------------------------------------
-    # Build convert options string
+    # JPEG conversion:
+    # Build options string for convert command
     # ---------------------------------------
     local convert_options=""
     if [ $jpeg_quality -gt 0 ]; then
@@ -636,7 +635,6 @@ function processNegatives {
         if [ $jpeg_quality -eq 0 ]; then
             e_result "$(printf "Result: %s" "${output_tiff}")"
             continue
-            #exit 0
         fi
 
         # So JPEG conversion is required:
@@ -849,9 +847,7 @@ function main {
     if [ $use_batch_mode -gt 0 ]; then
         runBatchMode ${recursion_arguments}
     else
-
         processNegatives ${image_parameters_array[@]}
-
     fi;
 
 
