@@ -49,7 +49,8 @@ function trapCleanupTempDir() {
     tmp_dir_to_clean="${WORK_TMPDIR:-}"
     if [ -d "${tmp_dir_to_clean}" ]; then
         printf "Remove temporary directory %s ... " "${tmp_dir_to_clean}"
-        rm -Rf "${tmp_dir_to_clean}" && e_success
+
+        rm -Rf "${tmp_dir_to_clean}" && e_success ""
     fi
 }
 trap trapCleanupTempDir EXIT SIGINT
@@ -167,7 +168,7 @@ function e_warning {
 }
 
 function e_success () {
-  echo -e "${C_GREEN}✔ ${*}${NC}"
+  echo -e "${C_GREEN}✔ ${*-}${NC}"
 }
 
 function e_result () {
@@ -615,7 +616,7 @@ function processNegatives {
         printf "Create positive image: "
         (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") \
         && {
-            e_success
+            e_success ""
         } || {
             e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
             continue
@@ -634,7 +635,7 @@ function processNegatives {
         printf "Convert to JPG: "
         (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
         && {
-            e_success
+            e_success ""
             rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
             e_result "$(printf "Result: %s" "${output_jpeg}")"
         } || {
