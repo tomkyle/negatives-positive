@@ -57,6 +57,7 @@ trap trapCleanupTempDir EXIT SIGINT
 
 
 
+
 # Files to work on
 # The regex shown here must be suitable for regex find'ing:
 # -iregex '.*\.(tif|tiff)'
@@ -323,7 +324,7 @@ function runBatchMode {
         printf "${C_GRAY}%s\n${NC}" "$(column "${TODO_TXT}")"
     fi
 
-    parallel --dry-run -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
+    # parallel --dry-run -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
     parallel -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
 
 
@@ -417,7 +418,10 @@ function convertToJpeg {
     # ---------------------------------------
 
     e_verbous "$(printf "\nconvert %s " "${convert_options}")"
+
+    IFS="${DEFAULT_IFS}"
     convert "${output_tiff}" ${convert_options} "${output_jpeg}"
+    IFS="${SAFER_IFS}"
 }
 
 # ======================================
@@ -436,21 +440,8 @@ function processNegatives {
     # System commands
     require awk
 
-
-    local -r INPUT_TIFF="${1}"
-    e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
-
-
-    # ---------------------------------------
-    # Plausibility check
-    # ---------------------------------------
-    if [ ! -f "${INPUT_TIFF}" ]; then
-        e_warning "$(printf 'processNegatives: %s is not a regular file.' "${INPUT_TIFF}")"
-        # continue;
-        exit 1
-    fi
-
-
+    # Files to work on.
+    local -r INPUT_FILES=("${@}")
 
 
     # --------------------------------------
@@ -601,54 +592,66 @@ function processNegatives {
     #  Process the file given
     # =============================================================
 
-
-    # ---------------------------------------
-    # Filename magic
-    # ---------------------------------------
-    local input_file_extension="${INPUT_TIFF##*.}";
-    local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
-    input_file_basename="${input_file_basename##*/}" # remove trailing slash
-
-    local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
-    local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
+    for INPUT_TIFF in "${INPUT_FILES[@]}"; do
 
 
 
-    # ---------------------------------------
-    #  Do 'real' inversion and image editing
-    # ---------------------------------------
-    e_verbous "$(echo;)"
-    printf "Create positive image: "
-    (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
-        e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
-        # continue
-        exit 1
-    }
-    e_success ""
-
-
-    # ---------------------------------------
-    # Do nothing else if JPEG conversion not required
-    # ---------------------------------------
-    if [ $jpeg_quality -eq 0 ]; then
-        e_result "$(printf "Result: %s" "${output_tiff}")"
-        # continue
-        exit 0
-    fi
-
-    # So JPEG conversion is required:
-    printf "Convert to JPG: "
-    (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
-    && {
-        e_success ""
-        rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
-        e_result "$(printf "Result: %s" "${output_jpeg}")"
-    } || {
-        if [ -f "${output_tiff}" ]; then
-            e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+        # ---------------------------------------
+        # Plausibility check
+        # ---------------------------------------
+        if [ ! -f "${INPUT_TIFF}" ]; then
+            e_warning "$(printf 'processNegatives: %s is not a regular file.' "${INPUT_TIFF}")"
+            continue;
         fi
-    }
 
+
+        # ---------------------------------------
+        # Filename magic
+        # ---------------------------------------
+        local input_file_extension="${INPUT_TIFF##*.}";
+        local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
+        input_file_basename="${input_file_basename##*/}" # remove trailing slash
+
+        local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
+        local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
+
+        e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
+
+        # ---------------------------------------
+        #  Do 'real' inversion and image editing
+        # ---------------------------------------
+        e_verbous "$(echo;)"
+        printf "Create positive image: "
+        (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
+            e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
+            continue
+            #exit 1
+        }
+        e_success ""
+
+
+        # ---------------------------------------
+        # Do nothing else if JPEG conversion not required
+        # ---------------------------------------
+        if [ $jpeg_quality -eq 0 ]; then
+            e_result "$(printf "Result: %s" "${output_tiff}")"
+            continue
+            #exit 0
+        fi
+
+        # So JPEG conversion is required:
+        printf "Convert to JPG: "
+        (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
+        && {
+            e_success ""
+            rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
+            e_result "$(printf "Result: %s" "${output_jpeg}")"
+        } || {
+            if [ -f "${output_tiff}" ]; then
+                e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+            fi
+        }
+    done
 }
 
 
@@ -740,7 +743,6 @@ function main {
     local recursion_arguments=""
 
     # Keeps anything that does not look like an option.
-    local image_parameters=""
     local -a image_parameters_array
 
 
@@ -827,7 +829,6 @@ function main {
                 # "Anything else must be an image parameter"
                 # This is a WORKAROUND, as without this "*)" block any given image parameters
                 # after the arguments seem to get lost (i.e., stuck in last $__option checked).
-                image_parameters+=" ${__option}"
                 image_parameters_array+=(${__option})
                 ;;
         esac
@@ -849,10 +850,7 @@ function main {
         runBatchMode ${recursion_arguments}
     else
 
-        for INPUT_TIFF in "${image_parameters_array[@]}"; do
-            (processNegatives "${INPUT_TIFF}")
-        done
-
+        processNegatives ${image_parameters_array[@]}
 
     fi;
 
