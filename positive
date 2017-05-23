@@ -635,7 +635,6 @@ function processNegatives {
         if [ $jpeg_quality -eq 0 ]; then
             e_result "$(printf "Result: %s" "${output_tiff}")"
             continue
-            #exit 0
         fi
 
         # So JPEG conversion is required:
