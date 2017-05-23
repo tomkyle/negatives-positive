@@ -451,6 +451,7 @@ function processNegatives {
 
 
     # ---------------------------------------
+    #  Color inversion and image editing:
     #  Build mogrify's options string.
     # ---------------------------------------
 
@@ -537,7 +538,8 @@ function processNegatives {
 
 
     # ---------------------------------------
-    # Build convert options string
+    # JPEG conversion:
+    # Build options string for convert command
     # ---------------------------------------
     local convert_options=""
     if [ $jpeg_quality -gt 0 ]; then
