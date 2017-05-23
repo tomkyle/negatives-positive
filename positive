@@ -837,7 +837,7 @@ function main {
                 # "Anything else must be an image parameter"
                 # This is a WORKAROUND, as without this "*)" block any given image parameters
                 # after the arguments seem to get lost (i.e., stuck in last $__option checked).
-                image_parameters+=" ${__option}"
+                image_parameters+=${__option}
                 image_parameters_array+=(${__option})
                 ;;
         esac
@@ -860,15 +860,17 @@ function main {
     else
 
         # This IFS line makes sure that processNegatives can handle parameters correctly
-        IFS="${SAFER_IFS}"
+        #IFS="${SAFER_IFS}"
 
         # DEBUG: This will not work
-        #for INPUT_TIFF in "${image_parameters[@]}"; do printf "\nmain: %s\n" "${INPUT_TIFF}"; done
-
+        for INPUT_TIFF in "${image_parameters_array[*]}"; do
+            printf "\nmain:%s\n" "${INPUT_TIFF}";
+        done
+        exit;
         processNegatives ${image_parameters}
 
         # Reset IFS
-        IFS="${DEFAULT_IFS}"
+        #IFS="${DEFAULT_IFS}"
     fi;
 
 
