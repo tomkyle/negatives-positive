@@ -217,11 +217,13 @@ function countLinesInFile {
 # --------------------------------------
 function catFirstFound {
     local file_to_cat="${1}"
-    if [ -f "${HOMEBREW_OPT_DIR}/${file_to_cat}" ]; then
-        cat "${HOMEBREW_OPT_DIR}/${file_to_cat}"
-    else
-        cat "${SCRIPT_DIR}/${file_to_cat}"
-    fi
+    local lookup=("${HOMEBREW_OPT_DIR}" "${SCRIPT_DIR}")
+
+    for dir in "${lookup[@]}"; do
+        if [ -f "${dir}/${file_to_cat}" ]; then
+            cat "${dir}/${file_to_cat}"
+        fi;
+    done
     echo;
 }
 
