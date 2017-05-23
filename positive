@@ -453,8 +453,10 @@ function processNegatives {
     # ---------------------------------------
     #  Build mogrify's options string.
     # ---------------------------------------
-    local mogrify_options=""
-    mogrify_options="-negate"
+
+    # Start with negative to positive inversion.
+    local mogrify_options="-negate"
+
 
 
     # Flip or flop the image, if required.
