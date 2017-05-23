@@ -450,13 +450,6 @@ function processNegatives {
     local -r INPUT_FILES=("${@}")
 
 
-    # --------------------------------------
-    # Default ICC profile.
-    # See DCRAW_COLORSPACE_VALUE
-    # --------------------------------------
-    local ICC_PROFILE_PATH
-    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
-
     # ---------------------------------------
     #  Build mogrify's options string.
     # ---------------------------------------
@@ -519,6 +512,12 @@ function processNegatives {
     fi
 
 
+    # Color conversion:
+    # Default ICC profile.
+    # See DCRAW_COLORSPACE_VALUE
+    local ICC_PROFILE_PATH
+    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
+
     #  Desaturate colors, if required:
     #  Equivalent to ImageMagick's "-grayscale rec709luma"
     #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
@@ -528,6 +527,7 @@ function processNegatives {
         mogrify_options+=" -modulate 100,0 -colorspace Gray"
     fi
     mogrify_options+=" -profile ${ICC_PROFILE_PATH}"
+
 
 
     #  Compress image
