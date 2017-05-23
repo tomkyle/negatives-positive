@@ -73,6 +73,12 @@ declare SEARCH_DIRECTORY="."
 declare GAMMA_DEFAULT=1
 
 
+# Percentage of histogram edges to be truncated.
+# The default is that 0.1 percent of the histogram entries are ignored.
+# Set to 0 to use the complete histogram.
+declare HISTOGRAM_THRESHOLD=0.1
+
+
 # Result suffix
 declare RESULT_SUFFIX=""
 declare RESULT_SUFFIX_DEFAULT="-positive"
@@ -442,17 +448,6 @@ function processNegatives {
 
     # Files to work on.
     local -r INPUT_FILES=("${@}")
-
-
-    # --------------------------------------
-    # Output contrast settings
-    # --------------------------------------
-
-
-    # Percentage of histogram edges to be truncated.
-    # The default is that 0.1 percent of the histogram entries are ignored.
-    # Set to 0 to use the complete histogram.
-    declare HISTOGRAM_THRESHOLD=0.1
 
 
     # --------------------------------------
