@@ -49,10 +49,12 @@ function trapCleanupTempDir() {
     tmp_dir_to_clean="${WORK_TMPDIR:-}"
     if [ -d "${tmp_dir_to_clean}" ]; then
         printf "Remove temporary directory %s ... " "${tmp_dir_to_clean}"
-        rm -Rf "${tmp_dir_to_clean}" && e_success
+
+        rm -Rf "${tmp_dir_to_clean}" && e_success ""
     fi
 }
 trap trapCleanupTempDir EXIT SIGINT
+
 
 
 
@@ -114,7 +116,7 @@ readonly OPTIONS_LIST="adnf:j:g:o:c:r:s:v"
 ### this breaks calling dcraw and mogrify. Better let this commented-out.
 readonly DEFAULT_IFS="${IFS}"
 readonly SAFER_IFS=$'\n\t'
-#IFS="${SAFER_IFS}"
+IFS="${SAFER_IFS}"
 
 
 # Filesystem basics
@@ -167,7 +169,7 @@ function e_warning {
 }
 
 function e_success () {
-  echo -e "${C_GREEN}✔ ${*}${NC}"
+  echo -e "${C_GREEN}✔ ${*-}${NC}"
 }
 
 function e_result () {
@@ -217,11 +219,13 @@ function countLinesInFile {
 # --------------------------------------
 function catFirstFound {
     local file_to_cat="${1}"
-    if [ -f "${HOMEBREW_OPT_DIR}/${file_to_cat}" ]; then
-        cat "${HOMEBREW_OPT_DIR}/${file_to_cat}"
-    else
-        cat "${SCRIPT_DIR}/${file_to_cat}"
-    fi
+    local lookup=("${HOMEBREW_OPT_DIR}" "${SCRIPT_DIR}")
+
+    for dir in "${lookup[@]}"; do
+        if [ -f "${dir}/${file_to_cat}" ]; then
+            cat "${dir}/${file_to_cat}"
+        fi;
+    done
     echo;
 }
 
@@ -320,7 +324,8 @@ function runBatchMode {
         printf "${C_GRAY}%s\n${NC}" "$(column "${TODO_TXT}")"
     fi
 
-    parallel "$0" "${FUNC_ARGUMENTS[@]}" {} < "${TODO_TXT}"
+    # parallel --dry-run -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
+    parallel -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
 
 
     # ---------------------------------------
@@ -359,7 +364,7 @@ function applyMogrify {
     # Just in case $INPUT_TIFF is NOT a regular file
     # ---------------------------------------
     if [ ! -f "${INPUT_TIFF}" ]; then
-        e_error "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
+        e_error "$(printf 'applyMogrify: %s is not a regular file.' "${INPUT_TIFF}")"
     fi
 
 
@@ -374,7 +379,10 @@ function applyMogrify {
     # ---------------------------------------
 
     e_verbous "$(printf "\nmogrify %s " "${mogrify_options}")"
+
+    IFS="${DEFAULT_IFS}"
     mogrify ${mogrify_options} "${output_tiff}"
+    IFS="${SAFER_IFS}"
 }
 
 
@@ -410,7 +418,10 @@ function convertToJpeg {
     # ---------------------------------------
 
     e_verbous "$(printf "\nconvert %s " "${convert_options}")"
+
+    IFS="${DEFAULT_IFS}"
     convert "${output_tiff}" ${convert_options} "${output_jpeg}"
+    IFS="${SAFER_IFS}"
 }
 
 # ======================================
@@ -431,7 +442,6 @@ function processNegatives {
 
     # Files to work on.
     local -r INPUT_FILES=("${@}")
-
 
 
     # --------------------------------------
@@ -578,21 +588,22 @@ function processNegatives {
 
 
 
-
     # =============================================================
-    #  The Loop: Process each file given
+    #  Process the file given
     # =============================================================
 
-    for INPUT_TIFF in "${INPUT_FILES[@]}"
-    do
+    for INPUT_TIFF in "${INPUT_FILES[@]}"; do
+
+
 
         # ---------------------------------------
         # Plausibility check
         # ---------------------------------------
         if [ ! -f "${INPUT_TIFF}" ]; then
-            e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
+            e_warning "$(printf 'processNegatives: %s is not a regular file.' "${INPUT_TIFF}")"
             continue;
         fi
+
 
         # ---------------------------------------
         # Filename magic
@@ -611,13 +622,12 @@ function processNegatives {
         # ---------------------------------------
         e_verbous "$(echo;)"
         printf "Create positive image: "
-        (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") \
-        && {
-            e_success
-        } || {
+        (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
             e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
             continue
+            #exit 1
         }
+        e_success ""
 
 
         # ---------------------------------------
@@ -626,13 +636,14 @@ function processNegatives {
         if [ $jpeg_quality -eq 0 ]; then
             e_result "$(printf "Result: %s" "${output_tiff}")"
             continue
+            #exit 0
         fi
 
         # So JPEG conversion is required:
         printf "Convert to JPG: "
         (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
         && {
-            e_success
+            e_success ""
             rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
             e_result "$(printf "Result: %s" "${output_jpeg}")"
         } || {
@@ -657,8 +668,6 @@ function main {
         printf "Run '%s --help' or with '-h' to get a list of all options.\n" "${SCRIPT_NAME}"
         exit 1
     fi
-
-
 
 
     # ---------------------------------------
@@ -734,7 +743,7 @@ function main {
     local recursion_arguments=""
 
     # Keeps anything that does not look like an option.
-    local image_parameters=""
+    local -a image_parameters_array
 
 
     # getopts and getopts have inconsistent behavior, so using a simple home-brewed
@@ -820,7 +829,7 @@ function main {
                 # "Anything else must be an image parameter"
                 # This is a WORKAROUND, as without this "*)" block any given image parameters
                 # after the arguments seem to get lost (i.e., stuck in last $__option checked).
-                image_parameters+=" ${__option}"
+                image_parameters_array+=(${__option})
                 ;;
         esac
         shift
@@ -840,7 +849,9 @@ function main {
     if [ $use_batch_mode -gt 0 ]; then
         runBatchMode ${recursion_arguments}
     else
-        processNegatives ${image_parameters}
+
+        processNegatives ${image_parameters_array[@]}
+
     fi;
 
 
