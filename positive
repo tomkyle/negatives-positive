@@ -399,10 +399,8 @@ function processNegatives {
     # ---------------------------------------
 
     local mogrify_options="$(buildMogrifyOptions)"
-    # Show what happens in verbous mode
-    if [ $verbous_mode -gt 0 ]; then
-        printf "Positive inversion with: \n%s\n" "$(e_verbous "mogrify ${mogrify_options}")"
-    fi;
+    [ $verbous_mode -gt 0 ] \
+    && printf "Positive inversion with: \n%s\n" "$(e_verbous "mogrify ${mogrify_options}")"
 
 
     # ---------------------------------------
@@ -411,9 +409,8 @@ function processNegatives {
     # ---------------------------------------
 
     local convert_options="$(buildJpegConvertOptions ${jpeg_quality})"
-    if [ ! -z "${convert_options}" -a $verbous_mode -gt 0 ]; then
-        printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
-    fi
+    [ ! -z "${convert_options}" -a $verbous_mode -gt 0 ] \
+    && printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
 
 
     # ---------------------------------------
@@ -430,20 +427,14 @@ function processNegatives {
     # ---------------------------------------
 
     # Reset if generally disabled
-
-    if [ $APPEND_RESULT_SUFFIX -eq 0 ]; then
-      RESULT_SUFFIX=""
-    fi;
+    [ $APPEND_RESULT_SUFFIX -eq 0 ] && RESULT_SUFFIX=""
 
 
     # When target directory is empty, i.e. current workdir,
-    # duplicate files must be avoided
+    # duplicate files must be avoided.
+    # If result suffix is empty, assume default value.
     if [ -z "${output_directory}" ]; then
-
-      # If result suffix is empty, assume default value.
-      if [ -z "${RESULT_SUFFIX}" ]; then
-        RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
-      fi;
+      [ -z "${RESULT_SUFFIX}" ] && RESULT_SUFFIX="${RESULT_SUFFIX_DEFAULT}"
     fi;
 
 
@@ -545,9 +536,7 @@ function invertToPositive {
     # ---------------------------------------
     # Just in case $INPUT_TIFF is NOT a regular file
     # ---------------------------------------
-    if [ ! -f "${INPUT_TIFF}" ]; then
-        e_error "$(printf 'invertToPositive: %s is not a regular file.' "${INPUT_TIFF}")"
-    fi
+    [ ! -f "${INPUT_TIFF}" ] && e_error "$(printf 'invertToPositive: %s is not a regular file.' "${INPUT_TIFF}")"
 
 
     # ---------------------------------------
@@ -592,18 +581,14 @@ function buildMogrifyOptions {
     fi
 
     # Resize image on its larger side
-    if [ $resize_width -gt 0 ]; then
-        mogrify_options+=" -resize ${resize_width}x${resize_width}>"
-    fi
+    [ $resize_width -gt 0 ] && mogrify_options+=" -resize ${resize_width}x${resize_width}>"
 
 
 
     #  Normalize colors, if required:
     #  Transform image to span the full range of color values
     #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-normalize
-    if [ $normalize_colors -eq 1 ]; then
-      mogrify_options+=" -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize";
-    fi
+    [ $normalize_colors -eq 1 ] && mogrify_options+=" -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize"
 
 
     #  Apply Sigmoidal Contrast Curve.
