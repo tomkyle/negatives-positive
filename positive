@@ -626,13 +626,13 @@ function processNegatives {
 
     for INPUT_TIFF in "${INPUT_FILES[@]}"; do
 
-
+        e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
 
         # ---------------------------------------
         # Plausibility check
         # ---------------------------------------
         if [ ! -f "${INPUT_TIFF}" ]; then
-            e_warning "$(printf 'processNegatives: %s is not a regular file.' "${INPUT_TIFF}")"
+            e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
             continue;
         fi
 
@@ -647,7 +647,7 @@ function processNegatives {
         local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
         local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
 
-        e_info "$(printf "%s\n" "${INPUT_TIFF}")"
+
 
         # ---------------------------------------
         #  Do 'real' inversion and image editing
