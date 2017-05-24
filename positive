@@ -189,26 +189,19 @@ function e_warning {
 
 function e_success () {
   printf "${C_GREEN}✔ %s${NC}" "${*-}"
-  if [ $debug_mode -gt 0 ]; then
-    echo -e ""
-  fi
+  [ $debug_mode -gt 0 ] && echo -e ""
 }
 
 function e_result () {
   echo -e "${C_GREEN}${*}${NC}"
-  #printf "${C_GREEN}%s${NC}" "${*}"
 }
 
 function e_verbous () {
-  if [ $verbous_mode -gt 0 ]; then
-    printf "${C_GRAY}%s${NC}" "${*}"
-  fi
+  [ $verbous_mode -gt 0 ] && printf "${C_GRAY}%s${NC}" "${*}"
 }
 
 function e_debug () {
-  if [ $debug_mode -gt 0 ]; then
-    printf "${C_GRAY}%s${NC}" "${*}"
-  fi
+  [ $debug_mode -gt 0 ] && printf "${C_GRAY}%s${NC}" "${*}"
 }
 
 
