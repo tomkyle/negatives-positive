@@ -301,7 +301,6 @@ _require_argument() {
 }
 
 
-
 # ======================================
 #  runBatchMode
 # ======================================
@@ -372,30 +371,6 @@ function runBatchMode {
     printf "Done:          %s images\n"   "${number_of_images}"
 }
 
-# ======================================
-#  buildJpegConvertOptions
-#
-#  Usage:
-#   buildJpegConvertOptions <quality>
-# ======================================
-
-function buildJpegConvertOptions {
-    # Do nothing if quality is 0
-    local jpeg_quality=${1}; shift
-    if [ ${jpeg_quality} -lt 1 ]; then
-        exit
-    fi
-
-    # JPG quality
-    local convert_options=" -quality ${jpeg_quality}"
-
-    # Convert to sRGB
-    local srgb_v4_appearance_profile
-    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
-    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
-
-    echo "${convert_options}"
-}
 
 # ======================================
 #  processNegatives
@@ -628,7 +603,6 @@ function processNegatives {
 }
 
 
-
 # ======================================
 #  invertToPositive
 #
@@ -709,6 +683,32 @@ function convertToJpeg {
     IFS="${DEFAULT_IFS}"
     convert "${output_tiff}" ${convert_options} "${output_jpeg}"
     IFS="${SAFER_IFS}"
+}
+
+
+# ======================================
+#  buildJpegConvertOptions
+#
+#  Usage:
+#   buildJpegConvertOptions <quality>
+# ======================================
+
+function buildJpegConvertOptions {
+    # Do nothing if quality is 0
+    local jpeg_quality=${1}; shift
+    if [ ${jpeg_quality} -lt 1 ]; then
+        exit
+    fi
+
+    # JPG quality
+    local convert_options=" -quality ${jpeg_quality}"
+
+    # Convert to sRGB
+    local srgb_v4_appearance_profile
+    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
+    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+
+    echo "${convert_options}"
 }
 
 
