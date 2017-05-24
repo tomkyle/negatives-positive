@@ -301,7 +301,6 @@ _require_argument() {
 }
 
 
-
 # ======================================
 #  runBatchMode
 # ======================================
@@ -372,28 +371,6 @@ function runBatchMode {
     printf "Done:          %s images\n"   "${number_of_images}"
 }
 
-# ======================================
-#  buildJpegConvertOptions
-# ======================================
-
-function buildJpegConvertOptions {
-    local jpeg_quality=${1}; shift
-
-    if [ ${jpeg_quality} -lt 1 ]; then
-        exit
-    fi
-
-    local convert_options=""
-    # JPG quality
-    convert_options+=" -quality ${jpeg_quality}"
-
-    # Convert to sRGB
-    local srgb_v4_appearance_profile
-    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
-    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
-
-    echo "${convert_options}"
-}
 
 # ======================================
 #  processNegatives
@@ -415,92 +392,13 @@ function processNegatives {
     local -r INPUT_FILES=("${@}")
 
 
+
     # ---------------------------------------
-    #  Color inversion and image editing:
-    #  Build mogrify's options string.
+    # Color inversion:
+    # Build options string for mogrify command
     # ---------------------------------------
 
-    # Start with negative to positive inversion.
-    local mogrify_options="-negate"
-
-
-
-    # Flip or flop the image, if required.
-    if [ ! -z "${flipflop_positive}" ]; then
-        if [ "${flipflop_positive}" = "flipflop" ]; then
-            mogrify_options+=" -flip -flop"
-        else
-            mogrify_options+=" -${flipflop_positive}"
-        fi
-    fi
-
-    # Resize image on its larger side
-    if [ $resize_width -gt 0 ]; then
-        mogrify_options+=" -resize ${resize_width}x${resize_width}>"
-    fi
-
-
-
-    #  Normalize colors, if required:
-    #  Transform image to span the full range of color values
-    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-normalize
-    if [ $normalize_colors -eq 1 ]; then
-      mogrify_options+=" -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize";
-    fi
-
-
-    #  Apply Sigmoidal Contrast Curve.
-    #  Increases the contrast without saturating highlights or shadows.
-    if [ $sigmoidal_contrast -gt 0 ]; then
-      mogrify_options="${mogrify_options} -sigmoidal-contrast ${sigmoidal_contrast},50%";
-
-      # Append to suffix
-      RESULT_SUFFIX="${RESULT_SUFFIX}-s${sigmoidal_contrast}"
-    fi
-
-
-
-    #  Apply Gamma, if required.
-    #  Having colors normalized with -n parameter is heavily recommended.
-    #
-    #  Quoted from IM docs:
-    #  Setting gamma to "auto" calculates the mean values of an image, then applies a calculated -gamma adjustment
-    #  so that is the mean color exists in the image it will get a have a value of 50%.
-    if [ "${gamma}" = "auto" ]; then
-      mogrify_options="${mogrify_options} -auto-gamma -auto-level"
-      RESULT_SUFFIX="${RESULT_SUFFIX}-autogamma"
-    else
-      if [ "${gamma}" != "${GAMMA_DEFAULT}" ]; then
-        GAMMA_VALUE=$(echo "1 ${gamma}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}')
-        mogrify_options="${mogrify_options} -gamma ${GAMMA_VALUE}";
-
-        # Append to suffix
-        RESULT_SUFFIX="${RESULT_SUFFIX}-g${gamma/./}"
-      fi
-    fi
-
-
-    # Color conversion:
-    # Default ICC profile.
-    # See DCRAW_COLORSPACE_VALUE
-    local ICC_PROFILE_PATH
-    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
-
-    #  Desaturate colors, if required:
-    #  Equivalent to ImageMagick's "-grayscale rec709luma"
-    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
-    if [ $desaturate_colors -eq 1 ]; then
-        # Linear Gamma 1.0 Gray profile
-        ICC_PROFILE_PATH=$(color-profiles gray-linear )
-        mogrify_options+=" -modulate 100,0 -colorspace Gray"
-    fi
-    mogrify_options+=" -profile ${ICC_PROFILE_PATH}"
-
-
-
-    #  Compress image
-    mogrify_options+=" -compress Zip "
-
+    local mogrify_options="$(buildMogrifyOptions)"
     # Show what happens in verbous mode
     if [ $verbous_mode -gt 0 ]; then
         printf "Positive inversion with: \n%s\n" "$(e_verbous "mogrify ${mogrify_options}")"
@@ -626,7 +524,6 @@ function processNegatives {
 }
 
 
-
 # ======================================
 #  invertToPositive
 #
@@ -672,6 +569,100 @@ function invertToPositive {
 
 
 # ======================================
+#  buildMogrifyOptions
+# ======================================
+function buildMogrifyOptions {
+    # ---------------------------------------
+    #  Color inversion and image editing:
+    #  Build mogrify's options string.
+    # ---------------------------------------
+
+    # Start with negative to positive inversion.
+    local mogrify_options="-negate"
+
+
+
+    # Flip or flop the image, if required.
+    if [ ! -z "${flipflop_positive}" ]; then
+        if [ "${flipflop_positive}" = "flipflop" ]; then
+            mogrify_options+=" -flip -flop"
+        else
+            mogrify_options+=" -${flipflop_positive}"
+        fi
+    fi
+
+    # Resize image on its larger side
+    if [ $resize_width -gt 0 ]; then
+        mogrify_options+=" -resize ${resize_width}x${resize_width}>"
+    fi
+
+
+
+    #  Normalize colors, if required:
+    #  Transform image to span the full range of color values
+    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-normalize
+    if [ $normalize_colors -eq 1 ]; then
+      mogrify_options+=" -set histogram-threshold ${HISTOGRAM_THRESHOLD} -normalize";
+    fi
+
+
+    #  Apply Sigmoidal Contrast Curve.
+    #  Increases the contrast without saturating highlights or shadows.
+    if [ $sigmoidal_contrast -gt 0 ]; then
+      mogrify_options="${mogrify_options} -sigmoidal-contrast ${sigmoidal_contrast},50%";
+
+      # Append to suffix
+      RESULT_SUFFIX="${RESULT_SUFFIX}-s${sigmoidal_contrast}"
+    fi
+
+
+
+    #  Apply Gamma, if required.
+    #  Having colors normalized with -n parameter is heavily recommended.
+    #
+    #  Quoted from IM docs:
+    #  Setting gamma to "auto" calculates the mean values of an image, then applies a calculated -gamma adjustment
+    #  so that is the mean color exists in the image it will get a have a value of 50%.
+    if [ "${gamma}" = "auto" ]; then
+      mogrify_options="${mogrify_options} -auto-gamma -auto-level"
+      RESULT_SUFFIX="${RESULT_SUFFIX}-autogamma"
+    else
+      if [ "${gamma}" != "${GAMMA_DEFAULT}" ]; then
+        GAMMA_VALUE=$(echo "1 ${gamma}" | LC_NUMERIC=en_US.utf-8 awk --use-lc-numeric '{printf "%0.2f", $1 / $2}')
+        mogrify_options="${mogrify_options} -gamma ${GAMMA_VALUE}";
+
+        # Append to suffix
+        RESULT_SUFFIX="${RESULT_SUFFIX}-g${gamma/./}"
+      fi
+    fi
+
+
+    # Color conversion:
+    # Default ICC profile.
+    # See DCRAW_COLORSPACE_VALUE
+    local ICC_PROFILE_PATH
+    ICC_PROFILE_PATH=$(color-profiles srgb-linear )
+
+    #  Desaturate colors, if required:
+    #  Equivalent to ImageMagick's "-grayscale rec709luma"
+    #  See http://www.graphicsmagick.org/GraphicsMagick.html#details-modulate
+    if [ $desaturate_colors -eq 1 ]; then
+        # Linear Gamma 1.0 Gray profile
+        ICC_PROFILE_PATH=$(color-profiles gray-linear )
+        mogrify_options+=" -modulate 100,0 -colorspace Gray"
+    fi
+    mogrify_options+=" -profile ${ICC_PROFILE_PATH}"
+
+
+
+    #  Compress image
+    mogrify_options+=" -compress Zip "
+
+    echo "${mogrify_options}"
+}
+
+
+# ======================================
 #  convertToJpeg
 #
 #  Usage:
@@ -707,6 +698,32 @@ function convertToJpeg {
     IFS="${DEFAULT_IFS}"
     convert "${output_tiff}" ${convert_options} "${output_jpeg}"
     IFS="${SAFER_IFS}"
+}
+
+
+# ======================================
+#  buildJpegConvertOptions
+#
+#  Usage:
+#   buildJpegConvertOptions <quality>
+# ======================================
+
+function buildJpegConvertOptions {
+    # Do nothing if quality is 0
+    local jpeg_quality=${1}; shift
+    if [ ${jpeg_quality} -lt 1 ]; then
+        exit
+    fi
+
+    # JPG quality
+    local convert_options=" -quality ${jpeg_quality}"
+
+    # Convert to sRGB
+    local srgb_v4_appearance_profile
+    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
+    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+
+    echo "${convert_options}"
 }
 
 
