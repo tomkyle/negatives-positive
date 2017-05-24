@@ -569,6 +569,11 @@ function processNegatives {
     #  Compress image
     mogrify_options+=" -compress Zip "
 
+    # Show what happens in verbous mode
+    if [ $verbous_mode -gt 0 ]; then
+        printf "Positive inversion with: \n%s\n" "$(e_verbous "mogrify ${mogrify_options}")"
+    fi;
+
 
     # ---------------------------------------
     # JPEG conversion:
@@ -583,6 +588,12 @@ function processNegatives {
         local srgb_v4_appearance_profile
         srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
         convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+
+        # Show what happens in verbous mode
+        if [ $verbous_mode -gt 0 ]; then
+            printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
+        fi;
+
     fi
 
 
