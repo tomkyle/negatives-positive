@@ -668,7 +668,6 @@ function processNegatives {
         (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
             e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
             continue
-            #exit 1
         }
         e_success ""
 
@@ -682,17 +681,19 @@ function processNegatives {
         if [ $jpeg_quality -gt 0 ]; then
 
             printf "JPG "
-            (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
-            && {
-                e_success ""
-                rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
-                result_file="${output_jpeg}"
-            } || {
+            (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") || {
                 if [ -f "${output_tiff}" ]; then
                     e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+                    continue
                 fi
             }
+            e_success ""
 
+            # Remove original TIFF
+            rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
+
+            # Redefine result output
+            result_file="${output_jpeg}"
         fi
 
         # ---------------------------------------
