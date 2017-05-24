@@ -374,6 +374,9 @@ function runBatchMode {
 
 # ======================================
 #  buildJpegConvertOptions
+#
+#  Usage:
+#   buildJpegConvertOptions <quality>
 # ======================================
 
 function buildJpegConvertOptions {
