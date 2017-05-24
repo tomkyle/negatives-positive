@@ -680,7 +680,7 @@ function processNegatives {
         # ---------------------------------------
         if [ $jpeg_quality -gt 0 ]; then
 
-            printf "JPG "
+            printf "JPG-%s " "${jpeg_quality}"
             (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") || {
                 if [ -f "${output_tiff}" ]; then
                     e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
