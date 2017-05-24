@@ -68,7 +68,6 @@ declare SEARCH_FILES_IREGEX='.*\.(tif|tiff)'
 declare SEARCH_DIRECTORY="."
 
 
-
 # Default Gamma value
 declare GAMMA_DEFAULT=1
 
@@ -102,7 +101,7 @@ declare -i jpeg_quality=0
 declare -i resize_width=0
 declare -i debug_mode=0
 declare gamma="${GAMMA_DEFAULT}"
-declare output_directory="${PWD}"
+declare output_directory=""
 declare sigmoidal_contrast=0
 declare flipflop_positive=""
 
@@ -512,10 +511,8 @@ function processNegatives {
     # ---------------------------------------
     # Create output directory if needed.
     # ---------------------------------------
-    if [ "${output_directory}" != "${PWD}" ]; then
-        mkdir -p "${output_directory}";
-    fi
 
+    [ ! -z "${output_directory}" ] && mkdir -p "${output_directory[*]}"
 
     # ---------------------------------------
     # Reset result suffix,
@@ -531,9 +528,9 @@ function processNegatives {
     fi;
 
 
-    # When target directory is $PWD,
+    # When target directory is empty, i.e. current workdir,
     # duplicate files must be avoided
-    if [ "${output_directory}" = "${PWD}" ]; then
+    if [ -z "${output_directory}" ]; then
 
       # If result suffix is empty, assume default value.
       if [ -z "${RESULT_SUFFIX}" ]; then
@@ -567,8 +564,10 @@ function processNegatives {
         local input_file_basename="${INPUT_TIFF%.$input_file_extension}"
         input_file_basename="${input_file_basename##*/}" # remove trailing slash
 
-        local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
-        local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
+        local output_path=""
+        [ ! -z "${output_directory}" ] && output_path="${output_directory}/"
+        local output_tiff="${output_path}${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
+        local output_jpeg="${output_path}${input_file_basename}${RESULT_SUFFIX}.jpg"
 
 
 
@@ -852,7 +851,8 @@ function main {
             -o|--output)
                 _require_argument "${__option}" "${__maybe_param}"
                 output_directory="${__maybe_param}"
-                recursion_arguments+=" ${__option} ${__maybe_param}"
+                # Note the quotes around maybe_param - they're for whitespaced paths!
+                recursion_arguments+=" ${__option} \"${__maybe_param}\""
                 shift
                 ;;
             -r|--resize)
