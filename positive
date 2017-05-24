@@ -506,6 +506,7 @@ function processNegatives {
             result_file="${output_jpeg}"
         fi
 
+
         # ---------------------------------------
         # Print result
         # ---------------------------------------
