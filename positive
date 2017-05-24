@@ -419,6 +419,7 @@ function processNegatives {
 
     [ ! -z "${output_directory}" ] && mkdir -p "${output_directory[*]}"
 
+
     # ---------------------------------------
     # Reset result suffix,
     # if disabled somewhere above.
@@ -428,7 +429,6 @@ function processNegatives {
 
     # Reset if generally disabled
     [ $APPEND_RESULT_SUFFIX -eq 0 ] && RESULT_SUFFIX=""
-
 
     # When target directory is empty, i.e. current workdir,
     # duplicate files must be avoided.
