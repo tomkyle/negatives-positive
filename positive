@@ -339,7 +339,7 @@ function runBatchMode {
     if [ $verbous_mode -gt 0 ]; then
         printf "Process these %s images, using GNU Parallel:\n" "${number_of_images}"
 
-        # When few images to be processed, use cat command should be plenty
+        # When few images to be processed, cat command should be plenty
         [ $number_of_images -le 6 ] && cat_or_column="cat" || cat_or_column="column"
 
         printf "${C_GRAY}%s\n${NC}" "$(${cat_or_column} "${TODO_TXT}")"
