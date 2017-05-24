@@ -672,27 +672,34 @@ function processNegatives {
         }
         e_success ""
 
+        # Prepare result output
+        local result_file="${output_tiff}"
+
 
         # ---------------------------------------
-        # Do nothing else if JPEG conversion not required
+        # If JPEG conversion required
         # ---------------------------------------
-        if [ $jpeg_quality -eq 0 ]; then
-            printf "Result %s" "$(e_result "${output_jpeg}")"
-            continue
+        if [ $jpeg_quality -gt 0 ]; then
+
+            printf "JPG "
+            (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
+            && {
+                e_success ""
+                rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
+                result_file="${output_jpeg}"
+            } || {
+                if [ -f "${output_tiff}" ]; then
+                    e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+                fi
+            }
+
         fi
 
-        # So JPEG conversion is required:
-        printf "JPG "
-        (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
-        && {
-            e_success ""
-            rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
-            printf "Result %s" "$(e_result "${output_jpeg}")"
-        } || {
-            if [ -f "${output_tiff}" ]; then
-                e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
-            fi
-        }
+        # ---------------------------------------
+        # Print result
+        # ---------------------------------------
+        printf "Result %s" "$(e_result "${result_file}")"
+
     done
 }
 
