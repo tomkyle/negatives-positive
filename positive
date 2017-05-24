@@ -125,20 +125,31 @@ readonly SAFER_IFS=$'\n\t'
 IFS="${SAFER_IFS}"
 
 
+# --------------------------------------
 # Filesystem basics
+# --------------------------------------
+
+# SCRIPT_DIR is where the currently runnig script lives in:
+# - Homebrew environment:     /usr/local/bin
+# - Development environment:  /path/to/positive-repo
 readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly SCRIPT_NAME=$(basename "${0}")
 
 
-# Consistent package location
+# Consistent package location:
+# - Homebrew environment:     /usr/local/opt/positive
 readonly HOMEBREW_OPT_DIR=$(brew --prefix "$(basename "${0}")")
-# Hack for development purposes
-# HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
+# Hack for development purposes
+# readonly HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
 # Prepare (but not create) a new temp directory
 readonly WORK_TMPDIR=$(mktemp -du "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { e_error "Failed to create temp directory name."; }
 
+
+# --------------------------------------
+# Miscellaneous
+# --------------------------------------
 
 # Formatting stuff
 readonly DIVIDER_LINE="$(echo;)"
@@ -150,11 +161,11 @@ readonly C_GRAY='\033[1;30m'
 readonly C_ORANGE=$(tput setaf 3)
 readonly NC='\033[0m' # No Color
 
-
 # Informative files
 readonly LICENSE_FILE="LICENSE"
 readonly USAGE_FILE="USAGE"
 readonly CREDITS_FILE="CREDITS"
+
 
 # --------------------------------------
 # Output and formatting functions
