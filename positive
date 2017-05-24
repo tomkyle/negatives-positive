@@ -48,10 +48,10 @@ require basename
 function trapCleanupTempDir() {
     tmp_dir_to_clean="${WORK_TMPDIR:-}"
     if [ -d "${tmp_dir_to_clean}" ]; then
-        printf "Remove temporary directory %s ... " "${tmp_dir_to_clean}"
-
-        rm -Rf "${tmp_dir_to_clean}" && e_success ""
+        rm -Rf "${tmp_dir_to_clean}" \
+        && e_debug "$(printf "Removed temporary directory %s ... \n" "${tmp_dir_to_clean}")"
     fi
+    echo;
 }
 trap trapCleanupTempDir EXIT SIGINT
 
@@ -100,10 +100,12 @@ declare -i desaturate_colors=0
 declare -i verbous_mode=0
 declare -i jpeg_quality=0
 declare -i resize_width=0
+declare -i debug_mode=0
 declare gamma="${GAMMA_DEFAULT}"
 declare output_directory="${PWD}"
 declare sigmoidal_contrast=0
 declare flipflop_positive=""
+
 
 
 
@@ -125,20 +127,31 @@ readonly SAFER_IFS=$'\n\t'
 IFS="${SAFER_IFS}"
 
 
+# --------------------------------------
 # Filesystem basics
+# --------------------------------------
+
+# SCRIPT_DIR is where the currently runnig script lives in:
+# - Homebrew environment:     /usr/local/bin
+# - Development environment:  /path/to/positive-repo
 readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly SCRIPT_NAME=$(basename "${0}")
 
 
-# Consistent package location
+# Consistent package location:
+# - Homebrew environment:     /usr/local/opt/positive
 readonly HOMEBREW_OPT_DIR=$(brew --prefix "$(basename "${0}")")
-# Hack for development purposes
-# HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
+# Hack for development purposes
+# readonly HOMEBREW_OPT_DIR=$SCRIPT_DIR
 
 # Prepare (but not create) a new temp directory
 readonly WORK_TMPDIR=$(mktemp -du "${TMPDIR:-/tmp/}$(basename 0).XXXXXXXXXXXX")  || { e_error "Failed to create temp directory name."; }
 
+
+# --------------------------------------
+# Miscellaneous
+# --------------------------------------
 
 # Formatting stuff
 readonly DIVIDER_LINE="$(echo;)"
@@ -150,11 +163,11 @@ readonly C_GRAY='\033[1;30m'
 readonly C_ORANGE=$(tput setaf 3)
 readonly NC='\033[0m' # No Color
 
-
 # Informative files
 readonly LICENSE_FILE="LICENSE"
 readonly USAGE_FILE="USAGE"
 readonly CREDITS_FILE="CREDITS"
+
 
 # --------------------------------------
 # Output and formatting functions
@@ -175,7 +188,10 @@ function e_warning {
 }
 
 function e_success () {
-  echo -e "${C_GREEN}✔ ${*-}${NC}"
+  printf "${C_GREEN}✔ %s${NC}" "${*-}"
+  if [ $debug_mode -gt 0 ]; then
+    echo -e ""
+  fi
 }
 
 function e_result () {
@@ -185,6 +201,12 @@ function e_result () {
 
 function e_verbous () {
   if [ $verbous_mode -gt 0 ]; then
+    printf "${C_GRAY}%s${NC}" "${*}"
+  fi
+}
+
+function e_debug () {
+  if [ $debug_mode -gt 0 ]; then
     printf "${C_GRAY}%s${NC}" "${*}"
   fi
 }
@@ -326,11 +348,22 @@ function runBatchMode {
     # ---------------------------------------
 
     if [ $verbous_mode -gt 0 ]; then
-        printf "Process these %s images, using GNU Parallel:\n" "${number_of_images}"
-        printf "${C_GRAY}%s\n${NC}" "$(column "${TODO_TXT}")"
+        printf "Process these %s images:\n" "${number_of_images}"
+
+        # When few images to be processed, cat command should be plenty
+        [ $number_of_images -le 6 ] && cat_or_column="cat" || cat_or_column="column"
+
+        printf "${C_GRAY}%s\n${NC}" "$(${cat_or_column} "${TODO_TXT}")"
+        echo;
     fi
 
-    # parallel --dry-run -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
+    if [ $debug_mode -gt 0 ]; then
+      echo "This is what GNU Parallel does:"
+      e_debug $(parallel --dry-run -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}")
+      echo;
+      echo;
+    fi
+
     parallel -a "${TODO_TXT}" "$0" "${FUNC_ARGUMENTS[@]}" "{}"
 
 
@@ -341,7 +374,7 @@ function runBatchMode {
     # Some stats
     local -r ELAPSED_TIME=$((SECONDS - START_TIME))
 
-    printf "\nSome stats:\n"
+    printf "Some stats:\n"
     printf "CPUs used:     %s\n"          "${CPUs}"
     printf "Elapsed time:  %smin %ssec\n" $((ELAPSED_TIME/60)) $((ELAPSED_TIME%60))
     printf "Done:          %s images\n"   "${number_of_images}"
@@ -384,7 +417,7 @@ function applyMogrify {
     # Call mogrify
     # ---------------------------------------
 
-    e_verbous "$(printf "\nmogrify %s " "${mogrify_options}")"
+    e_debug "$(printf "mogrify %s " "${mogrify_options}")"
 
     IFS="${DEFAULT_IFS}"
     mogrify ${mogrify_options} "${output_tiff}"
@@ -423,7 +456,7 @@ function convertToJpeg {
     # Call convert
     # ---------------------------------------
 
-    e_verbous "$(printf "\nconvert %s " "${convert_options}")"
+    e_debug "$(printf "convert %s " "${convert_options}")"
 
     IFS="${DEFAULT_IFS}"
     convert "${output_tiff}" ${convert_options} "${output_jpeg}"
@@ -536,6 +569,11 @@ function processNegatives {
     #  Compress image
     mogrify_options+=" -compress Zip "
 
+    # Show what happens in verbous mode
+    if [ $verbous_mode -gt 0 ]; then
+        printf "Positive inversion with: \n%s\n" "$(e_verbous "mogrify ${mogrify_options}")"
+    fi;
+
 
     # ---------------------------------------
     # JPEG conversion:
@@ -550,6 +588,12 @@ function processNegatives {
         local srgb_v4_appearance_profile
         srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
         convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+
+        # Show what happens in verbous mode
+        if [ $verbous_mode -gt 0 ]; then
+            printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
+        fi;
+
     fi
 
 
@@ -593,13 +637,13 @@ function processNegatives {
 
     for INPUT_TIFF in "${INPUT_FILES[@]}"; do
 
-
+        e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
 
         # ---------------------------------------
         # Plausibility check
         # ---------------------------------------
         if [ ! -f "${INPUT_TIFF}" ]; then
-            e_warning "$(printf 'processNegatives: %s is not a regular file.' "${INPUT_TIFF}")"
+            e_warning "$(printf '%s is not a regular file.' "${INPUT_TIFF}")"
             continue;
         fi
 
@@ -614,41 +658,49 @@ function processNegatives {
         local output_tiff="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.${input_file_extension}"
         local output_jpeg="${output_directory}/${input_file_basename}${RESULT_SUFFIX}.jpg"
 
-        e_info "$(printf "\n%s\n" "${INPUT_TIFF}")"
+
 
         # ---------------------------------------
         #  Do 'real' inversion and image editing
         # ---------------------------------------
         e_verbous "$(echo;)"
-        printf "Create positive image: "
+        printf "Positive "
         (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
             e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
             continue
-            #exit 1
         }
         e_success ""
 
+        # Prepare result output
+        local result_file="${output_tiff}"
+
 
         # ---------------------------------------
-        # Do nothing else if JPEG conversion not required
+        # If JPEG conversion required
         # ---------------------------------------
-        if [ $jpeg_quality -eq 0 ]; then
-            e_result "$(printf "Result: %s" "${output_tiff}")"
-            continue
+        if [ $jpeg_quality -gt 0 ]; then
+
+            printf "JPG-%s " "${jpeg_quality}"
+            (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") || {
+                if [ -f "${output_tiff}" ]; then
+                    e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
+                    continue
+                fi
+            }
+            e_success ""
+
+            # Remove original TIFF
+            rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
+
+            # Redefine result output
+            result_file="${output_jpeg}"
         fi
 
-        # So JPEG conversion is required:
-        printf "Convert to JPG: "
-        (convertToJpeg "${output_tiff}" "${convert_options}" "${output_jpeg}") \
-        && {
-            e_success ""
-            rm "${output_tiff}" || e_warning "$(printf 'Can not remove file %s' "${output_tiff}")"
-            e_result "$(printf "Result: %s" "${output_jpeg}")"
-        } || {
-            if [ -f "${output_tiff}" ]; then
-                e_warning "$(printf "Did not convert to JPEG, result still:\n%s" "${output_tiff}")"
-            fi
-        }
+        # ---------------------------------------
+        # Print result
+        # ---------------------------------------
+        printf "Result %s" "$(e_result "${result_file}")"
+
     done
 }
 
@@ -769,6 +821,10 @@ function main {
                 ;;
             -d|--desaturate)
                 desaturate_colors=1
+                recursion_arguments+=" ${__option}"
+                ;;
+            --debug)
+                debug_mode=1
                 recursion_arguments+=" ${__option}"
                 ;;
             -n|--normalize)
