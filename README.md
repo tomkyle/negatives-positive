@@ -195,7 +195,7 @@ positive -adn -g 2.2 -o gamma-corrected
 - **The digicam exposure** chosen during digitalization,  
   i.e. how light or dark is your photo from the negative.
 
-Examples for typical values (according to my personal workflow):
+**Recommendation:** Always worth trying is `--gamma auto` or `-g auto`. This will calculate a mean medium gray which is quite suitable for images taken in ‘real life’ without extreme exposure. Here are some examples for typical values (according to my personal workflow):
  
 gamma | description
 :-----|:----------
