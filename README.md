@@ -121,8 +121,6 @@ $ positive -d --jpg 85 --output foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 $ positive -d -j 85 -o foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 ```
 
-Positive ✔ JPG-80 ✔ Result 
-
 ```bash
 # Output
 DSC_0123.tiff
