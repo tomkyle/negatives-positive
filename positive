@@ -381,87 +381,6 @@ function runBatchMode {
 }
 
 
-# ======================================
-#  invertToPositive
-#
-#  Usage:
-#    invertToPositive <input_file> <mogrify_options> <output_tiff> <output_jpeg>
-# ======================================
-
-function invertToPositive {
-    # Homebrew dependencies
-    require mogrify
-
-    # Parameters
-    local INPUT_TIFF="${1}"; shift
-    local mogrify_options="${1}"; shift
-    local output_tiff="${1}"; shift
-    local output_jpeg="${1}"; shift
-
-
-    # ---------------------------------------
-    # Just in case $INPUT_TIFF is NOT a regular file
-    # ---------------------------------------
-    if [ ! -f "${INPUT_TIFF}" ]; then
-        e_error "$(printf 'invertToPositive: %s is not a regular file.' "${INPUT_TIFF}")"
-    fi
-
-
-    # ---------------------------------------
-    # Create workfile to work on with mogrify
-    # ---------------------------------------
-    cp "${INPUT_TIFF}" "${output_tiff}"
-
-
-    # ---------------------------------------
-    # Call mogrify
-    # ---------------------------------------
-
-    e_debug "$(printf "mogrify %s " "${mogrify_options}")"
-
-    IFS="${DEFAULT_IFS}"
-    mogrify ${mogrify_options} "${output_tiff}"
-    IFS="${SAFER_IFS}"
-}
-
-
-# ======================================
-#  convertToJpeg
-#
-#  Usage:
-#    convertToJpeg <input_file> <convert_options> <output_file.jpg>
-# ======================================
-function convertToJpeg {
-
-    # --------------------------------------
-    # Requirements
-    # --------------------------------------
-
-    # Homebrew dependencies
-    require convert
-
-    # Parameters
-    local output_tiff="${1}"; shift
-    local convert_options="${1}"; shift
-    local output_jpeg="${1}"; shift
-
-    # ---------------------------------------
-    # Just in case $output_tiff is NOT a regular file
-    # ---------------------------------------
-    if [ ! -f "${output_tiff}" ]; then
-        e_error "$(printf '%s is not a regular file.' "${output_tiff}")"
-    fi
-
-    # ---------------------------------------
-    # Call convert
-    # ---------------------------------------
-
-    e_debug "$(printf "convert %s " "${convert_options}")"
-
-    IFS="${DEFAULT_IFS}"
-    convert "${output_tiff}" ${convert_options} "${output_jpeg}"
-    IFS="${SAFER_IFS}"
-}
 
 # ======================================
 #  processNegatives
@@ -702,6 +621,90 @@ function processNegatives {
         printf "Result %s" "$(e_result "${result_file}")"
 
     done
+}
+
+
+
+# ======================================
+#  invertToPositive
+#
+#  Usage:
+#    invertToPositive <input_file> <mogrify_options> <output_tiff> <output_jpeg>
+# ======================================
+
+function invertToPositive {
+    # Homebrew dependencies
+    require mogrify
+
+    # Parameters
+    local INPUT_TIFF="${1}"; shift
+    local mogrify_options="${1}"; shift
+    local output_tiff="${1}"; shift
+    local output_jpeg="${1}"; shift
+
+
+    # ---------------------------------------
+    # Just in case $INPUT_TIFF is NOT a regular file
+    # ---------------------------------------
+    if [ ! -f "${INPUT_TIFF}" ]; then
+        e_error "$(printf 'invertToPositive: %s is not a regular file.' "${INPUT_TIFF}")"
+    fi
+
+
+    # ---------------------------------------
+    # Create workfile to work on with mogrify
+    # ---------------------------------------
+    cp "${INPUT_TIFF}" "${output_tiff}"
+
+
+    # ---------------------------------------
+    # Call mogrify
+    # ---------------------------------------
+
+    e_debug "$(printf "mogrify %s " "${mogrify_options}")"
+
+    IFS="${DEFAULT_IFS}"
+    mogrify ${mogrify_options} "${output_tiff}"
+    IFS="${SAFER_IFS}"
+}
+
+
+# ======================================
+#  convertToJpeg
+#
+#  Usage:
+#    convertToJpeg <input_file> <convert_options> <output_file.jpg>
+# ======================================
+function convertToJpeg {
+
+    # --------------------------------------
+    # Requirements
+    # --------------------------------------
+
+    # Homebrew dependencies
+    require convert
+
+    # Parameters
+    local output_tiff="${1}"; shift
+    local convert_options="${1}"; shift
+    local output_jpeg="${1}"; shift
+
+    # ---------------------------------------
+    # Just in case $output_tiff is NOT a regular file
+    # ---------------------------------------
+    if [ ! -f "${output_tiff}" ]; then
+        e_error "$(printf '%s is not a regular file.' "${output_tiff}")"
+    fi
+
+    # ---------------------------------------
+    # Call convert
+    # ---------------------------------------
+
+    e_debug "$(printf "convert %s " "${convert_options}")"
+
+    IFS="${DEFAULT_IFS}"
+    convert "${output_tiff}" ${convert_options} "${output_jpeg}"
+    IFS="${SAFER_IFS}"
 }
 
 
