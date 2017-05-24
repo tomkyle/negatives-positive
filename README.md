@@ -55,6 +55,9 @@ Run *positive* without parameters to get a short help text.
 #### -a, --all
 All images (batch mode). Process any TIFF file in working directory.
 
+#### --debug
+Switch on debugging mode, showing everything that's going on.
+
 #### -f, --flipflop *direction*  
 Mirror the image vertically and/or horizontally. Possible values are `flop` horizontal, `flip` vertical or even `flipflop` (guess what). Example: `-f flop`
 
