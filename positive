@@ -382,13 +382,13 @@ function runBatchMode {
 
 
 # ======================================
-#  applyMogrify
+#  invertToPositive
 #
 #  Usage:
-#    applyMogrify <input_file> <mogrify_options> <output_tiff> <output_jpeg>
+#    invertToPositive <input_file> <mogrify_options> <output_tiff> <output_jpeg>
 # ======================================
 
-function applyMogrify {
+function invertToPositive {
     # Homebrew dependencies
     require mogrify
 
@@ -403,7 +403,7 @@ function applyMogrify {
     # Just in case $INPUT_TIFF is NOT a regular file
     # ---------------------------------------
     if [ ! -f "${INPUT_TIFF}" ]; then
-        e_error "$(printf 'applyMogrify: %s is not a regular file.' "${INPUT_TIFF}")"
+        e_error "$(printf 'invertToPositive: %s is not a regular file.' "${INPUT_TIFF}")"
     fi
 
 
@@ -665,7 +665,7 @@ function processNegatives {
         # ---------------------------------------
         e_verbous "$(echo;)"
         printf "Positive "
-        (applyMogrify "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
+        (invertToPositive "${INPUT_TIFF}" "${mogrify_options}" "${output_tiff}" "${output_jpeg}") || {
             e_warning "$(printf "Could not create positive: %s" "${INPUT_TIFF}")"
             continue
         }
