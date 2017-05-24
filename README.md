@@ -106,35 +106,32 @@ $ positive --desaturate DSC_0123.tif
 $ positive -d DSC_0123.tif
 ```
 
-```
-------------------------------------------
+```bash
+# Output
 DSC_0123.tif
-Create positive image: Done.
-Result: DSC_0123-positive.tif
+Positive ✔ Result DSC_0123-positive.tif
 ```
 
-**Second example:** Again, we use desaturation, and this time the positives go into a subdirectory. The results are now stored in a `foobar` directory (Note: no `-positive` suffix).
+**Second example:** Again, we use desaturation, and this time the positives go as JPG into a subdirectory. The results are now stored in a `foobar` directory (Note: no `-positive` suffix).
 
 ```bash
-$ positive -d --output foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
-$ positive -d -o foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
+# These are equal:
+$ positive -d --jpg 85 --output foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
+$ positive -d -j 85 -o foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 ```
 
-```
-------------------------------------------
+Positive ✔ JPG-80 ✔ Result 
+
+```bash
+# Output
 DSC_0123.tiff
-Create positive image: Done.
-Result: foobar/DSC_0123.tiff
+Positive ✔ JPG-80 ✔ Result foobar/DSC_0123.jpg
 
-------------------------------------------
 DSC_0124.tiff
-Create positive image: Done.
-Result: foobar/DSC_0124.tiff
+Positive ✔ JPG-80 ✔ Result foobar/DSC_0124.jpg
 
-------------------------------------------
 DSC_0125.tiff
-Create positive image: Done.
-Result: foobar/DSC_0125.tiff
+Positive ✔ JPG-80 ✔ Result foobar/DSC_0125.jpg
 ```
 
 
@@ -151,25 +148,18 @@ $ positive --all -d -n -o results
 $ positive -adn -o results
 ```
 
-```
-------------------------------------------
+```bash
+# Output
 Process 3 images, using GNU Parallel:
 
-------------------------------------------
 DSC_0123.tiff
-Create positive image: Done.
-Result: foobar/DSC_0123.tiff
+Positive ✔ Result foobar/DSC_0123.tiff
 
-------------------------------------------
 DSC_0124.tiff
-Create positive image: Done.
-Result: foobar/DSC_0124.tiff
-
-------------------------------------------
+Positive ✔ Result foobar/DSC_0124.tiff
 
 (...and many more...)
 
-------------------------------------------
 Some stats:
 CPUs used:        4
 Elapsed time:     0min 30sec
