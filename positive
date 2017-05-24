@@ -372,7 +372,28 @@ function runBatchMode {
     printf "Done:          %s images\n"   "${number_of_images}"
 }
 
+# ======================================
+#  buildJpegConvertOptions
+# ======================================
 
+function buildJpegConvertOptions {
+    local jpeg_quality=${1}; shift
+
+    if [ ${jpeg_quality} -lt 1 ]; then
+        exit
+    fi
+
+    local convert_options=""
+    # JPG quality
+    convert_options+=" -quality ${jpeg_quality}"
+
+    # Convert to sRGB
+    local srgb_v4_appearance_profile
+    srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
+    convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
+
+    echo "${convert_options}"
+}
 
 # ======================================
 #  processNegatives
@@ -490,21 +511,10 @@ function processNegatives {
     # JPEG conversion:
     # Build options string for convert command
     # ---------------------------------------
-    local convert_options=""
-    if [ $jpeg_quality -gt 0 ]; then
-        # JPG quality
-        convert_options+=" -quality ${jpeg_quality}"
 
-        # Convert to sRGB
-        local srgb_v4_appearance_profile
-        srgb_v4_appearance_profile=$(color-profiles srgb-v4 )
-        convert_options+=" -colorspace sRGB -profile ${srgb_v4_appearance_profile}"
-
-        # Show what happens in verbous mode
-        if [ $verbous_mode -gt 0 ]; then
-            printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
-        fi;
-
+    local convert_options="$(buildJpegConvertOptions ${jpeg_quality})"
+    if [ ! -z "${convert_options}" -a $verbous_mode -gt 0 ]; then
+        printf "JPEG conversion with: \n%s\n" "$(e_verbous "convert ${convert_options}")"
     fi
 
 
