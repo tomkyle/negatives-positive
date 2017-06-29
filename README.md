@@ -198,7 +198,7 @@ positive -adn -g 2.2 -o gamma-corrected
  
 gamma | description
 :-----|:----------
-auto | Calculated gamma, based on mean values. Recommended for ‘real life images’.
+auto | Calculated gamma, based on mean values. Implies gamma 2.2 and is recommended for ‘real life images’.
 1.0 | No Gamma for linear TIFFs. This is the default value if omitted.
 1.8 | Moderate darkening, resulting in overall light images
 2.2 | Well-known software standard; This is what common photo software would apply.
