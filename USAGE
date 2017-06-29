@@ -8,6 +8,7 @@ DESCRIPTION:  Converts digital film negatives (TIFF files) to positive images,
 
 USAGE:        Batch mode: Process all TIFF files in current directory:
               $ positive -a [OPTIONS]
+              $ positive --all [OPTIONS]
 
               Process one or more TIFF file(s):
               $ positive [OPTIONS] FILE [other FILE(s)]

@@ -40,14 +40,14 @@ Open your terminal application and go to your images directory. *positive* will 
 
 
 ```bash
-$ positive [options] [-a | file(s)]
+$ positive [options] [--all | file(s)]
 ```
 
 See [Options](#options) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [Workflow Recommendations](#workflow-recommendations) · [**Issues and FAQ**](#issues-and-faq)
 
 ## Options
 
-Run *positive* without parameters to get a short help text.
+[Files and Output](#files-and-output) · [Color and Contrast](#color-and-contrast).
 
 ### Files and output
 
@@ -79,7 +79,7 @@ Verbous mode — show some more information under way.
 
 
 ### Color and Contrast
-
+[Files and Output](#files-and-output) · [Color and Contrast](#color-and-contrast).
 
 #### -d, --desaturate
 Desaturate colors, recommended for B/W negatives. Bonus: The TIFF will be converted to 16 bit Grayscale, saving up to 60% in file size; The image will have linear gamma 1.0 ICC profile applied (Gray-elle-V4-g10.icc).
@@ -94,6 +94,7 @@ Stretch histogram to reach black and white points. Recommended for most images.
 Sigmoidal contrast value around 50% middle-gray. Increases the contrast without saturating highlights or shadows. Quoted from ImageMagick docs: “3 is typical and 20 is a lot.” Example: `-s 5`
 
 See [Usage](#usage) · [Examples](#xamples) · [Gamma correction](#gamma-correction) · [Sigmoidal contrast](#sigmoidal-contrast) · [**Issues and FAQ**](#issues-and-faq)
+
 
 ## Examples
 
@@ -119,8 +120,6 @@ Positive ✔ Result DSC_0123-positive.tif
 $ positive -d --jpg 85 --output foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 $ positive -d -j 85 -o foobar DSC_0123.tiff DSC_0124.tiff DSC_0125.tiff
 ```
-
-Positive ✔ JPG-80 ✔ Result 
 
 ```bash
 # Output
@@ -199,7 +198,7 @@ positive -adn -g 2.2 -o gamma-corrected
  
 gamma | description
 :-----|:----------
-auto | Calculated gamma, based on mean values. Recommended for ‘real life images’.
+auto | Calculated gamma, based on mean values. Implies gamma 2.2 and is recommended for ‘real life images’.
 1.0 | No Gamma for linear TIFFs. This is the default value if omitted.
 1.8 | Moderate darkening, resulting in overall light images
 2.2 | Well-known software standard; This is what common photo software would apply.
